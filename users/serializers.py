@@ -25,24 +25,10 @@ class UserCreateUpdateSerializer(RegisterSerializer):
 
         return user
 
-    # def update(self, instance, validated_data):
-    #     """
-    #     Update and return an existing `User` instance, given the validated data.
-    #     """
-    #     email = validated_data.get("email")
-    #     if email:
-
-    #         exporter_user = ExtendedUser.objects.filter(
-    #             email__iexact=email
-    #         )
-    #         if not exporter_user.exists():
-    #             instance.baseuser_ptr.email = email
-    #             instance.baseuser_ptr.save()
-    #             instance.save()
-    #     return instance
-
 
 class UserSerializer(serializers.ModelSerializer):
+    phone_number = PhoneNumberField(required=False, allow_blank=True, region="GB")
+
     class Meta:
         model = ExtendedUser
         exclude = ("password", "is_superuser", "groups", "user_permissions")
