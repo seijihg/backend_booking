@@ -7,7 +7,7 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 from .models import ExtendedUser
 
 
-class UserCreateUpdateSerializer(RegisterSerializer):
+class UserCreateSerializer(RegisterSerializer):
     email = serializers.EmailField(
         error_messages={
             "invalid": "Enter an email address in the correct format, like name@example.com"
