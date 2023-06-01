@@ -2,10 +2,10 @@ from django.db import models
 from django_extensions.db.models import TimeStampedModel
 from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from phonenumber_field.modelfields import PhoneNumberField
 
 from salon.models import Salon
 from booking_api.models import CommonInfo
+from address.models import Address
 
 
 # Create your models here.
@@ -46,6 +46,7 @@ class ExtendedUser(AbstractUser, PermissionsMixin, TimeStampedModel, CommonInfo)
     )
     username = None
     salon = models.ForeignKey(Salon, on_delete=models.SET_NULL, null=True, blank=True)
+    addresses = models.ManyToManyField(Address)
 
     objects = CustomAccountManager()
 
