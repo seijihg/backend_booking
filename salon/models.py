@@ -1,9 +1,12 @@
 from django.db import models
-from phonenumber_field.modelfields import PhoneNumberField
+
+from django_extensions.db.models import TimeStampedModel
 
 from booking_api.models import CommonInfo
+from address.models import Address
 
 
 # Create your models here.
-class Salon(CommonInfo):
+class Salon(CommonInfo, TimeStampedModel):
     name = models.CharField(max_length=255)
+    addresses = models.ManyToManyField(Address)

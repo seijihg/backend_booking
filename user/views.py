@@ -67,7 +67,7 @@ class CustomLoginView(LoginView):
 
 
 class UserListView(APIView):
-    permission_classes = [permissions.IsAdminUser]  # Field is_staff = True
+    # permission_classes = [permissions.IsAdminUser]  # Field is_staff = True
     pagination_class = PageNumberPagination
 
     def get(self, request):
