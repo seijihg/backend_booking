@@ -7,15 +7,15 @@ from dj_rest_auth.views import LoginView
 from rest_framework.pagination import PageNumberPagination
 
 
-from users.serializers import UserCreateUpdateSerializer, UserSerializer
-from users.permissions import IsTokenOwner
+from user.serializers import UserCreateSerializer, UserSerializer
+from user.permissions import IsTokenOwner
 from .models import ExtendedUser
 from .helpers import generate_tokens
 
 
 # Create your views here.
 class CustomRegisterView(RegisterView):
-    serializer_class = UserCreateUpdateSerializer
+    serializer_class = UserCreateSerializer
 
     def post(self, request, format=None, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)

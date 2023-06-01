@@ -1,7 +1,7 @@
 from django.urls import path
-from users.views import CustomRegisterView, CustomLoginView, UserDetails, UserListView
+from user.views import CustomRegisterView, CustomLoginView, UserDetails, UserListView
 
-app_name = "users"
+app_name = "user"
 
 
 urlpatterns = [

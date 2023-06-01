@@ -56,7 +56,9 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "dj_rest_auth.registration",
     "phonenumber_field",
-    "users",
+    "booking_api",
+    "user",
+    "salon",
 ]
 
 MIDDLEWARE = [
@@ -146,7 +148,7 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL = "users.ExtendedUser"
+AUTH_USER_MODEL = "user.ExtendedUser"
 
 SITE_ID = 1
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
@@ -171,9 +173,6 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 5,  # Specify the number of items per page
-}
-REST_AUTH_REGISTER_SERIALIZERS = {
-    "REGISTER_SERIALIZER": "users.serializers.UserCreateUpdateSerializer",
 }
 
 if DEBUG == True:
