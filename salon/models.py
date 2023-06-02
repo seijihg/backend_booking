@@ -9,4 +9,4 @@ from address.models import Address
 # Create your models here.
 class Salon(CommonInfo, TimeStampedModel):
     name = models.CharField(max_length=255)
-    addresses = models.ManyToManyField(Address)
+    addresses = models.ManyToManyField(Address, blank=True)
