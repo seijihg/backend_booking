@@ -46,7 +46,7 @@ class ExtendedUser(AbstractUser, PermissionsMixin, TimeStampedModel, CommonInfo)
     )
     username = None
     salon = models.ForeignKey(Salon, on_delete=models.SET_NULL, null=True, blank=True)
-    addresses = models.ManyToManyField(Address)
+    addresses = models.ManyToManyField(Address, blank=True)
 
     objects = CustomAccountManager()
 

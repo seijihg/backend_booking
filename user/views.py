@@ -8,7 +8,7 @@ from rest_framework.pagination import PageNumberPagination
 
 
 from user.serializers import UserCreateSerializer, UserSerializer
-from user.permissions import IsTokenOwner
+from user.permissions import IsTokenOwnerOrAdmin
 from .models import ExtendedUser
 from .helpers import generate_tokens
 
@@ -80,7 +80,7 @@ class UserListView(APIView):
 
 
 class UserDetails(APIView):
-    permission_classes = [IsTokenOwner, permissions.IsAdminUser]
+    permission_classes = [IsTokenOwnerOrAdmin]
 
     def get(self, request, pk):
         try:
