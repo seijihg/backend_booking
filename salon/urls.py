@@ -5,7 +5,7 @@ app_name = "salon"
 
 
 urlpatterns = [
-    path("", SalonListCreateAPIView.as_view(), name="register"),
+    path("", SalonListCreateAPIView.as_view(), name="salons"),
     path(
         "<int:pk>/",
         SalonDetailUpdateDeleteView.as_view(),
