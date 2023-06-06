@@ -10,3 +10,6 @@ from address.models import Address
 class Salon(CommonInfo, TimeStampedModel):
     name = models.CharField(max_length=255)
     addresses = models.ManyToManyField(Address, blank=True)
+
+    def __str__(self):
+        return self.name

@@ -9,7 +9,7 @@ migrate:
 server:
 	python3 manage.py runserver
 
-start-dramatiq:
+dramatiq:
 ifeq ($(UNAME), Windows)
 	venv\Scripts\activate.bat; \
 	python3 manage.py rundramatiq;
@@ -17,3 +17,6 @@ else
 	. .venv/bin/activate; \
 	python3 manage.py rundramatiq;
 endif
+
+shell:
+	python3 manage.py shell
