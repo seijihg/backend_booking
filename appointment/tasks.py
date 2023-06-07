@@ -9,27 +9,36 @@ client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 
 
 @dramatiq.actor
-def send_sms_reminder(booking_id):
+def send_sms_reminder(booking_id, cancelled_info=None):
     """Send a reminder to a phone using Twilio SMS"""
     # Get our appointment from the database
-    try:
-        appointment = Appointment.objects.get(pk=booking_id)
-    except Appointment.DoesNotExist:
-        # The appointment we were trying to remind someone about
-        # has been deleted, so we don't need to do anything
-        return
+    if cancelled_info:
+        body = f"Hi, We regret to inform you that your scheduled appointment for {cancelled_info['time_date']} has been cancelled."
 
-    breakpoint()
-    appointment_time = arrow.get(appointment.appointment_time)
-    customer = appointment.user.first_name
+        client.messages.create(
+            body=body,
+            to=cancelled_info["phone_number"],
+            from_=settings.TWILIO_PHONE_NUMBER,
+        )
 
-    if not customer:
-        customer = "Customer"
+    else:
+        try:
+            appointment = Appointment.objects.get(pk=booking_id)
+        except Appointment.DoesNotExist:
+            # The appointment we were trying to remind someone about
+            # has been deleted, so we don't need to do anything
+            return
 
-    body = f'Hi {customer}. You have an appointment coming up at {appointment_time.format("YYYY-MM-DD h:mm a")}.'
+        appointment_time = arrow.get(appointment.appointment_time)
+        customer = appointment.user.first_name
 
-    client.messages.create(
-        body=body,
-        to=str(appointment.user.phone_number),
-        from_=settings.TWILIO_PHONE_NUMBER,
-    )
+        if not customer:
+            customer = "Customer"
+
+        body = f'Hi {customer}, You have an appointment coming up at {appointment_time.format("YYYY-MM-DD h:mm a")}.'
+
+        client.messages.create(
+            body=body,
+            to=str(appointment.user.phone_number),
+            from_=settings.TWILIO_PHONE_NUMBER,
+        )

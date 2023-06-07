@@ -8,3 +8,8 @@ from appointment.serializers import Appointment
 class AppointmentListCreateAPIView(ListCreateAPIView):
     queryset = Appointment.objects.all()
     serializer_class = AppointmentSerializer
+
+
+class AppointmentDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
+    queryset = Appointment.objects.all()
+    serializer_class = AppointmentSerializer
