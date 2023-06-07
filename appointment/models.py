@@ -23,19 +23,21 @@ class Appointment(TimeStampedModel):
         """Schedule a Dramatiq task to send a reminder for this appointment"""
 
         # Calculate the correct time to send this reminder
-        appointment_time = arrow.get(self.date_time, self.time_zone.zone)
+        appointment_time = arrow.get(self.appointment_time)
         reminder_time = appointment_time.shift(minutes=-5)
-        now = arrow.now(self.time_zone.zone)
+        now = arrow.now()
         milli_to_wait = int((reminder_time - now).total_seconds()) * 1000
         # Schedule the Dramatiq task
         from .tasks import send_sms_reminder
 
-        result = send_sms_reminder.send_with_options(args=(self.pk,))
+        result = send_sms_reminder.send_with_options(
+            args=(self.pk,), delay=milli_to_wait
+        )
 
         return result.options["redis_message_id"]
 
     def cancel_task(self):
-        redis_client = redis.Redis(host=settings.REDIS_URL, port=6379, db=0)
+        redis_client = redis.Redis.from_url(settings.REDIS_URL)
         redis_client.hdel("dramatiq:default.DQ.msgs", self.task_id)
 
     def save(self, *args, **kwargs):
@@ -55,3 +57,22 @@ class Appointment(TimeStampedModel):
 
         # Save our appointment again, with the new task_id
         Appointment.objects.filter(id=self.id).update(task_id=self.task_id)
+
+    def delete_reminder(self):
+        from .tasks import send_sms_reminder
+
+        time_date = arrow.get(self.appointment_time).format("YYYY-MM-DD h:mm a")
+        phone_number = str(self.user.phone_number)
+        result = send_sms_reminder.send(
+            self.pk, {"time_date": time_date, "phone_number": phone_number}
+        )
+
+        return result.options["redis_message_id"]
+
+    def delete(self, *args, **kwargs):
+        if self.task_id:
+            self.cancel_task()
+
+        self.delete_reminder()
+
+        super().delete(*args, **kwargs)
