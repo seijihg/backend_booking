@@ -13,7 +13,7 @@ def send_sms_reminder(booking_id, cancelled_info=None):
     """Send a reminder to a phone using Twilio SMS"""
     # Get our appointment from the database
     if cancelled_info:
-        body = f"Hi, We regret to inform you that your scheduled appointment for {cancelled_info['time_date']} has been cancelled."
+        body = f"Hi, We regret to inform you that your scheduled appointment for {cancelled_info.get('time_date', 'N/A')} has been cancelled."
 
         client.messages.create(
             body=body,
@@ -30,7 +30,7 @@ def send_sms_reminder(booking_id, cancelled_info=None):
             return
 
         appointment_time = arrow.get(appointment.appointment_time)
-        customer = appointment.user.first_name
+        customer = appointment.customer.full_name
 
         if not customer:
             customer = "Customer"
@@ -39,6 +39,6 @@ def send_sms_reminder(booking_id, cancelled_info=None):
 
         client.messages.create(
             body=body,
-            to=str(appointment.user.phone_number),
+            to=str(appointment.customer.phone_number),
             from_=settings.TWILIO_PHONE_NUMBER,
         )

@@ -4,13 +4,14 @@ from django.db import models
 from django_extensions.db.models import TimeStampedModel
 import redis
 from salon.models import Salon
-from user.models import ExtendedUser
+from user.models import Customer, ExtendedUser
 
 
 # Create your models here.
 class Appointment(TimeStampedModel):
     salon = models.ForeignKey(Salon, on_delete=models.CASCADE)
     user = models.ForeignKey(ExtendedUser, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     appointment_time = models.DateTimeField()
 
     # Additional fields not visible to users
@@ -31,7 +32,8 @@ class Appointment(TimeStampedModel):
         from .tasks import send_sms_reminder
 
         result = send_sms_reminder.send_with_options(
-            args=(self.pk,), delay=milli_to_wait
+            args=(self.pk,),
+            # delay=milli_to_wait
         )
 
         return result.options["redis_message_id"]
@@ -62,7 +64,7 @@ class Appointment(TimeStampedModel):
         from .tasks import send_sms_reminder
 
         time_date = arrow.get(self.appointment_time).format("YYYY-MM-DD h:mm a")
-        phone_number = str(self.user.phone_number)
+        phone_number = str(self.customer.phone_number)
         result = send_sms_reminder.send(
             self.pk, {"time_date": time_date, "phone_number": phone_number}
         )
