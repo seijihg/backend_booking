@@ -55,3 +55,11 @@ class ExtendedUser(AbstractUser, PermissionsMixin, TimeStampedModel, CommonInfo)
 
     def __str__(self) -> str:
         return self.email
+
+
+class Customer(TimeStampedModel, CommonInfo):
+    full_name = models.CharField(max_length=150, blank=True)
+    salon = models.ForeignKey(Salon, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.full_name} {self.phone_number}"
