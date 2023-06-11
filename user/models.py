@@ -3,7 +3,10 @@ from django_extensions.db.models import TimeStampedModel
 from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
 from django.contrib.auth.validators import UnicodeUsernameValidator
 
-from phonenumber_field.modelfields import PhoneNumberField
+from salon.models import Salon
+from booking_api.models import CommonInfo
+from address.models import Address
+
 
 # Create your models here.
 class CustomAccountManager(BaseUserManager):
@@ -22,7 +25,6 @@ class CustomAccountManager(BaseUserManager):
         return user
 
     def create_user(self, email, password, **kwargs):
-        breakpoint()
         kwargs.setdefault("is_superuser", False)
 
         return self._create_user(email, password, **kwargs)
@@ -35,15 +37,16 @@ class CustomAccountManager(BaseUserManager):
         return self._create_user(email, password, **kwargs)
 
 
-class ExtendedUser(AbstractUser, PermissionsMixin, TimeStampedModel):
+class ExtendedUser(AbstractUser, PermissionsMixin, TimeStampedModel, CommonInfo):
     username_validator = UnicodeUsernameValidator()
     email = models.EmailField(unique=True)
-    phone_number = PhoneNumberField(default="")
     is_owner = models.BooleanField(
         default=False,
         help_text="Designates whether the user is the owner.",
     )
     username = None
+    salon = models.ForeignKey(Salon, on_delete=models.SET_NULL, null=True, blank=True)
+    addresses = models.ManyToManyField(Address, blank=True)
 
     objects = CustomAccountManager()
 
@@ -52,3 +55,11 @@ class ExtendedUser(AbstractUser, PermissionsMixin, TimeStampedModel):
 
     def __str__(self) -> str:
         return self.email
+
+
+class Customer(TimeStampedModel, CommonInfo):
+    full_name = models.CharField(max_length=150, blank=True)
+    salon = models.ForeignKey(Salon, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.full_name} {self.phone_number}"

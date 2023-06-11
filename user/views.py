@@ -4,17 +4,18 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LoginView
+from rest_framework.pagination import PageNumberPagination
 
 
-from users.serializers import UserCreateUpdateSerializer, UserSerializer
-from users.permissions import IsTokenOwner
+from user.serializers import UserCreateSerializer, UserSerializer
+from user.permissions import IsTokenOwnerOrAdmin
 from .models import ExtendedUser
 from .helpers import generate_tokens
 
 
 # Create your views here.
 class CustomRegisterView(RegisterView):
-    serializer_class = UserCreateUpdateSerializer
+    serializer_class = UserCreateSerializer
 
     def post(self, request, format=None, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -65,36 +66,48 @@ class CustomLoginView(LoginView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserDetail(APIView):
-    permission_classes = [IsTokenOwner]
+class UserListView(APIView):
+    # permission_classes = [permissions.IsAdminUser]  # Field is_staff = True
+    pagination_class = PageNumberPagination
+
+    def get(self, request):
+        users = ExtendedUser.objects.all()
+        paginator = self.pagination_class()
+        paginated_users = paginator.paginate_queryset(users, request)
+
+        serializer = UserSerializer(paginated_users, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+
+class UserDetails(APIView):
+    permission_classes = [IsTokenOwnerOrAdmin]
 
     def get(self, request, pk):
-        """
-        Get user from pk
-        """
-
         try:
             user = ExtendedUser.objects.get(pk=pk)
         except ExtendedUser.DoesNotExist:
-            return Response(data={"errors": {"user": "User does not exist."}})
+            return Response(
+                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         serializer = UserSerializer(user)
 
         return Response(data={"user": serializer.data})
 
-    # def put(self, request, pk):
-    #     """
-    #     Update Exporter user
-    #     """
-    #     user = get_user_by_pk(pk)
-    #     data = request.data
-    #     data["organisation"] = get_request_user_organisation_id(request)
+    def patch(self, request, pk):
+        try:
+            user = ExtendedUser.objects.get(pk=pk)
+        except ExtendedUser.DoesNotExist:
+            return Response(
+                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
-    #     serializer = ExporterUserCreateUpdateSerializer(user, data=data, partial=True)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return JsonResponse(
-    #             data={"user": serializer.data}, status=status.HTTP_200_OK
-    #         )
+        serializer = UserSerializer(
+            user, data=request.data, partial=True
+        )  # set partial=True to update a data partially
 
-    #     return JsonResponse(data={"errors": serializer.errors}, status=400)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

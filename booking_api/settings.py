@@ -56,7 +56,12 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "dj_rest_auth.registration",
     "phonenumber_field",
-    "users",
+    "django_dramatiq",
+    "booking_api",
+    "user",
+    "salon",
+    "address",
+    "appointment",
 ]
 
 MIDDLEWARE = [
@@ -146,7 +151,7 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL = "users.ExtendedUser"
+AUTH_USER_MODEL = "user.ExtendedUser"
 
 SITE_ID = 1
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
@@ -166,11 +171,34 @@ SIMPLE_JWT = {
 }
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": ("dj_rest_auth.jwt_auth.JWTCookieAuthentication",)
-}
-REST_AUTH_REGISTER_SERIALIZERS = {
-    "REGISTER_SERIALIZER": "users.serializers.UserCreateUpdateSerializer",
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
+    ),
+    # "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 5,  # Specify the number of items per page
 }
 
 if DEBUG == True:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+REDIS_URL = os.environ.get("REDIS_URL")
+
+DRAMATIQ_BROKER = {
+    "BROKER": "dramatiq.brokers.redis.RedisBroker",
+    "OPTIONS": {
+        "url": REDIS_URL,
+    },
+    "MIDDLEWARE": [
+        "dramatiq.middleware.Prometheus",
+        "dramatiq.middleware.AgeLimit",
+        "dramatiq.middleware.TimeLimit",
+        "dramatiq.middleware.Callbacks",
+        "dramatiq.middleware.Retries",
+        "django_dramatiq.middleware.AdminMiddleware",
+        "django_dramatiq.middleware.DbConnectionsMiddleware",
+    ],
+}
+
+TWILIO_ACCOUNT_SID = os.environ.get("TWILLIO_SID")
+TWILIO_AUTH_TOKEN = os.environ.get("TWILLIO_TOKEN")
+TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
