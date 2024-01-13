@@ -1,5 +1,12 @@
 from django.urls import path
-from user.views import CustomRegisterView, CustomLoginView, UserDetails, UserListView
+from user.views import (
+    CustomRegisterView,
+    CustomLoginView,
+    CustomerDetailView,
+    UserDetails,
+    UserListView,
+    CustomerListCreateAPIView,
+)
 
 app_name = "user"
 
@@ -13,4 +20,6 @@ urlpatterns = [
         UserDetails.as_view(),
         name="user-details",
     ),
+    path("customers/", CustomerListCreateAPIView.as_view(), name="customers"),
+    path("customers/<int:pk>/", CustomerDetailView.as_view(), name="customer-detail"),
 ]

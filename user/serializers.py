@@ -4,7 +4,7 @@ from rest_framework import serializers
 from phonenumber_field.serializerfields import PhoneNumberField
 from dj_rest_auth.registration.serializers import RegisterSerializer
 
-from .models import ExtendedUser
+from .models import ExtendedUser, Customer
 
 
 class UserCreateSerializer(RegisterSerializer):
@@ -32,3 +32,11 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExtendedUser
         exclude = ("password", "is_superuser", "groups", "user_permissions")
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    phone_number = PhoneNumberField(required=True, allow_blank=False, region="GB")
+
+    class Meta:
+        model = Customer
+        fields = "__all__"

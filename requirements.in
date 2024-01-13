@@ -1,17 +1,18 @@
 # Django
 # ------------
-Django>=4.1.4
+Django>=5.0.1
 djangorestframework>=3.14.0
-django-environ>=0.9.0
+django-environ>=0.11.2
 django-extensions>=3.2.1
 django-phonenumber-field>=7.0.1
 dj-rest-auth>=2.2.5
 djangorestframework-simplejwt>=5.2.2
 django-allauth>=0.50.0
+django-cors-headers>=4.1.0
 
 # Production dependencies
 # -----------------
-pip-tools>=6.12.0
+pip-tools>=7.3.0
 psycopg2>=2.9.5
 
 # Other Python deps

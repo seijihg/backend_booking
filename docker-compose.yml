@@ -1,0 +1,8 @@
+services:
+  redis:
+    image: "redis:latest"
+    container_name: redis_booking
+    expose:
+      - 6379
+    ports:
+      - 6379:6379
