@@ -54,11 +54,12 @@ class Appointment(TimeStampedModel):
         # which is used in schedule_reminder
         super().save(*args, **kwargs)
 
-        # Schedule a new reminder task for this appointment
-        self.task_id = self.schedule_reminder()
+        if self.customer.phone_number:
+            # Schedule a new reminder task for this appointment
+            self.task_id = self.schedule_reminder()
 
-        # Save our appointment again, with the new task_id
-        Appointment.objects.filter(id=self.id).update(task_id=self.task_id)
+            # Save our appointment again, with the new task_id
+            Appointment.objects.filter(id=self.id).update(task_id=self.task_id)
 
     def delete_reminder(self):
         from .tasks import send_sms_reminder

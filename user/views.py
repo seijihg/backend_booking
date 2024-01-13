@@ -5,11 +5,12 @@ from rest_framework.response import Response
 from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LoginView
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 
 
-from user.serializers import UserCreateSerializer, UserSerializer
+from user.serializers import UserCreateSerializer, UserSerializer, CustomerSerializer
 from user.permissions import IsTokenOwnerOrAdmin
-from .models import ExtendedUser
+from .models import Customer, ExtendedUser
 from .helpers import generate_tokens
 
 
@@ -59,7 +60,13 @@ class CustomLoginView(LoginView):
             user_serializer = UserSerializer(user)
             response.data["user"] = user_serializer.data
             response.data["access_token"] = tokens["access_token"]
-            response.set_cookie("refresh_token", tokens["refresh_token"], httponly=True)
+            response.set_cookie(
+                "refresh_token",
+                tokens["refresh_token"],
+                httponly=True,
+                secure=True,
+                samesite="None",
+            )
 
             return response
 
@@ -80,7 +87,7 @@ class UserListView(APIView):
 
 
 class UserDetails(APIView):
-    permission_classes = [IsTokenOwnerOrAdmin]
+    # permission_classes = [IsTokenOwnerOrAdmin]
 
     def get(self, request, pk):
         try:
@@ -111,3 +118,13 @@ class UserDetails(APIView):
             return Response(serializer.data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CustomerListCreateAPIView(ListCreateAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+
+
+class CustomerDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
