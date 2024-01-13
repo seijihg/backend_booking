@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from datetime import timedelta
 import os
 import environ
+import dj_database_url
 
 env = environ.Env(
     # set casting, default value
@@ -109,13 +110,8 @@ WSGI_APPLICATION = "booking_api.wsgi.application"
 
 # Parse database connection url strings
 # like psql://user:pass@127.0.0.1:8458/db
-DATABASES = {
-    # read os.environ['DATABASE_URL'] and raises
-    # ImproperlyConfigured exception if not found
-    #
-    # The db() method is an alias for db_url().
-    "default": env.db()
-}
+DATABASE_URL = env("DATABASE_URL")
+DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
 
