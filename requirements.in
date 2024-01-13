@@ -14,6 +14,7 @@ django-cors-headers>=4.1.0
 # -----------------
 pip-tools>=7.3.0
 psycopg2>=2.9.5
+gunicorn>=21.2.0
 
 # Other Python deps
 # -----------------

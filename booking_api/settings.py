@@ -16,8 +16,10 @@ import environ
 
 env = environ.Env(
     # set casting, default value
-    DEBUG=(bool, False)
+    DEBUG=(bool, False),
+    DEVELOPMENT_MODE=(bool, False),
 )
+
 
 # Set the project base directory
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,6 +30,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 # SECURITY WARNING: don't run with debug turned on in production!
 # False if not in os.environ because of casting above
 DEBUG = env("DEBUG")
+DEVELOPMENT_MODE = env("DEVELOPMENT_MODE")
 
 # Raises Django's ImproperlyConfigured
 # exception if SECRET_KEY not in os.environ
