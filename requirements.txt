@@ -71,6 +71,8 @@ django-extensions==3.2.1
     # via -r requirements.in
 django-phonenumber-field==7.0.1
     # via -r requirements.in
+django-phonenumbers==1.0.1
+    # via -r requirements.in
 djangorestframework==3.14.0
     # via
     #   -r requirements.in
@@ -123,6 +125,8 @@ pathspec==0.10.3
     # via black
 pep517==0.13.0
     # via build
+phonenumbers==8.13.27
+    # via django-phonenumbers
 pika==1.3.2
     # via dramatiq
 pip-tools==7.3.0
