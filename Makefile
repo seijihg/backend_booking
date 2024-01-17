@@ -1,4 +1,4 @@
-.PHONY: migrate server start-dramatiq
+.PHONY: migrate server dramatiq
 
 migrations:
 	python3 manage.py makemigrations

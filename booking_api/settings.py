@@ -13,11 +13,14 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from datetime import timedelta
 import os
 import environ
+import dj_database_url
 
 env = environ.Env(
     # set casting, default value
-    DEBUG=(bool, False)
+    DEBUG=(bool, False),
+    DEVELOPMENT_MODE=(bool, False),
 )
+
 
 # Set the project base directory
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,6 +31,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 # SECURITY WARNING: don't run with debug turned on in production!
 # False if not in os.environ because of casting above
 DEBUG = env("DEBUG")
+DEVELOPMENT_MODE = env("DEVELOPMENT_MODE")
 
 # Raises Django's ImproperlyConfigured
 # exception if SECRET_KEY not in os.environ
@@ -106,13 +110,8 @@ WSGI_APPLICATION = "booking_api.wsgi.application"
 
 # Parse database connection url strings
 # like psql://user:pass@127.0.0.1:8458/db
-DATABASES = {
-    # read os.environ['DATABASE_URL'] and raises
-    # ImproperlyConfigured exception if not found
-    #
-    # The db() method is an alias for db_url().
-    "default": env.db()
-}
+DATABASE_URL = env("DATABASE_URL")
+DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
 
