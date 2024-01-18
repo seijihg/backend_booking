@@ -207,3 +207,5 @@ DRAMATIQ_BROKER = {
 TWILIO_ACCOUNT_SID = os.environ.get("TWILLIO_SID")
 TWILIO_AUTH_TOKEN = os.environ.get("TWILLIO_TOKEN")
 TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
+
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
