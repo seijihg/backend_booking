@@ -5,7 +5,11 @@ from rest_framework.response import Response
 from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LoginView
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import (
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+    ListAPIView,
+)
 
 
 from user.serializers import UserCreateSerializer, UserSerializer, CustomerSerializer
@@ -73,17 +77,19 @@ class CustomLoginView(LoginView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserListView(APIView):
+class UserListView(ListAPIView):
     # permission_classes = [permissions.IsAdminUser]  # Field is_staff = True
-    pagination_class = PageNumberPagination
+    # pagination_class = PageNumberPagination
 
     def get(self, request):
-        users = ExtendedUser.objects.all()
-        paginator = self.pagination_class()
-        paginated_users = paginator.paginate_queryset(users, request)
-
-        serializer = UserSerializer(paginated_users, many=True)
-        return paginator.get_paginated_response(serializer.data)
+        salon_id = request.query_params.get("salon")
+        users = ExtendedUser.objects.filter(salon=salon_id)
+        # paginator = self.pagination_class()
+        # paginated_users = paginator.paginate_queryset(users, request)
+        # serializer = UserSerializer(paginated_users, many=True)
+        # return paginator.get_paginated_response(serializer.data)
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
 
 
 class UserDetails(APIView):

@@ -13,6 +13,7 @@ class Appointment(TimeStampedModel):
     user = models.ForeignKey(ExtendedUser, on_delete=models.CASCADE)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     appointment_time = models.DateTimeField()
+    comment = models.TextField(blank=True, default="")
 
     # Additional fields not visible to users
     task_id = models.CharField(max_length=50, blank=True, editable=False)

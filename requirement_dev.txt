@@ -1,0 +1,7 @@
+black==25.1.0
+ruff==0.12.0
+bandit==1.8.5     
+pytest==8.4.1
+pytest-cov==6.2.1
+pre-commit==4.2.0
+yamllint==1.37.1
