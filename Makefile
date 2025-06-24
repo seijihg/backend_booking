@@ -9,6 +9,9 @@ migrate:
 server:
 	python3 manage.py runserver
 
+shell:
+	python3 manage.py shell
+
 dramatiq:
 ifeq ($(UNAME), Windows)
 	venv\Scripts\activate.bat; \
