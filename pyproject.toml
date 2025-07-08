@@ -25,10 +25,6 @@ ignore = [
   "E203", # whitespace before ':'
 ]
 
-# Treat these as *errors* that break CI
-# (Ruff’s default is “warning”; We runs CI in --fail-on warnings mode)
-required-rules = ["E", "F", "B"]
-
 # Any auto-fixable offences are patched in place:
 fix = true
 
