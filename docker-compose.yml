@@ -1,8 +1,119 @@
 services:
-  redis:
-    image: "redis:latest"
-    container_name: redis_booking
-    expose:
-      - 6379
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: booking_db
+      POSTGRES_USER: booking_user
+      POSTGRES_PASSWORD: booking_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - 6379:6379
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U booking_user -d booking_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis_booking
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://booking_user:booking_password@db:5432/booking_db
+      - REDIS_URL=redis://redis:6379/0
+      - DJANGO_SECRET_KEY=your-secret-key-here-change-in-production
+      - DEBUG=True
+      - DEVELOPMENT_MODE=True
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER:-}
+      # Seed data
+      - SEED_SALON_NAME=${SEED_SALON_NAME:-Default Salon}
+      - SEED_SALON_STREET=${SEED_SALON_STREET:-123 Default St}
+      - SEED_SALON_CITY=${SEED_SALON_CITY:-London}
+      - SEED_SALON_POSTAL_CODE=${SEED_SALON_POSTAL_CODE:-SW1A 1AA}
+      - SEED_OWNER_EMAIL=${SEED_OWNER_EMAIL:-owner@example.com}
+      - SEED_OWNER_FIRST_NAME=${SEED_OWNER_FIRST_NAME:-Default}
+      - SEED_OWNER_LAST_NAME=${SEED_OWNER_LAST_NAME:-Owner}
+      - SEED_OWNER_FULL_NAME=${SEED_OWNER_FULL_NAME:-Default Owner}
+      - SEED_OWNER_DEFAULT_PASSWORD=${SEED_OWNER_DEFAULT_PASSWORD:-defaultpass123}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: .
+    command: python manage.py rundramatiq
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=postgresql://booking_user:booking_password@db:5432/booking_db
+      - REDIS_URL=redis://redis:6379/0
+      - DJANGO_SECRET_KEY=your-secret-key-here-change-in-production
+      - DEBUG=True
+      - DEVELOPMENT_MODE=True
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER:-}
+      # Seed data
+      - SEED_SALON_NAME=${SEED_SALON_NAME:-Default Salon}
+      - SEED_SALON_STREET=${SEED_SALON_STREET:-123 Default St}
+      - SEED_SALON_CITY=${SEED_SALON_CITY:-London}
+      - SEED_SALON_POSTAL_CODE=${SEED_SALON_POSTAL_CODE:-SW1A 1AA}
+      - SEED_OWNER_EMAIL=${SEED_OWNER_EMAIL:-owner@example.com}
+      - SEED_OWNER_FIRST_NAME=${SEED_OWNER_FIRST_NAME:-Default}
+      - SEED_OWNER_LAST_NAME=${SEED_OWNER_LAST_NAME:-Owner}
+      - SEED_OWNER_FULL_NAME=${SEED_OWNER_FULL_NAME:-Default Owner}
+      - SEED_OWNER_DEFAULT_PASSWORD=${SEED_OWNER_DEFAULT_PASSWORD:-defaultpass123}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Development helper service for database migrations
+  migrate:
+    build: .
+    command: python manage.py migrate
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=postgresql://booking_user:booking_password@db:5432/booking_db
+      - REDIS_URL=redis://redis:6379/0
+      - DJANGO_SECRET_KEY=your-secret-key-here-change-in-production
+      # Seed data
+      - SEED_SALON_NAME=${SEED_SALON_NAME:-Default Salon}
+      - SEED_SALON_STREET=${SEED_SALON_STREET:-123 Default St}
+      - SEED_SALON_CITY=${SEED_SALON_CITY:-London}
+      - SEED_SALON_POSTAL_CODE=${SEED_SALON_POSTAL_CODE:-SW1A 1AA}
+      - SEED_OWNER_EMAIL=${SEED_OWNER_EMAIL:-owner@example.com}
+      - SEED_OWNER_FIRST_NAME=${SEED_OWNER_FIRST_NAME:-Default}
+      - SEED_OWNER_LAST_NAME=${SEED_OWNER_LAST_NAME:-Owner}
+      - SEED_OWNER_FULL_NAME=${SEED_OWNER_FULL_NAME:-Default Owner}
+      - SEED_OWNER_DEFAULT_PASSWORD=${SEED_OWNER_DEFAULT_PASSWORD:-defaultpass123}
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
