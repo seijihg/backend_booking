@@ -20,6 +20,3 @@ else
 	. .venv/bin/activate; \
 	python3 manage.py rundramatiq;
 endif
-
-shell:
-	python3 manage.py shell
