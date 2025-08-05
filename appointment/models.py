@@ -1,8 +1,9 @@
 import arrow
+import redis
 from django.conf import settings
 from django.db import models
 from django_extensions.db.models import TimeStampedModel
-import redis
+
 from salon.models import Salon
 from user.models import Customer, ExtendedUser
 
@@ -14,6 +15,8 @@ class Appointment(TimeStampedModel):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     appointment_time = models.DateTimeField()
     comment = models.TextField(blank=True, default="")
+    column_id = models.IntegerField(default=1)
+    end_time = models.DateTimeField(blank=True, null=True)
 
     # Additional fields not visible to users
     task_id = models.CharField(max_length=50, blank=True, editable=False)
@@ -25,10 +28,10 @@ class Appointment(TimeStampedModel):
         """Schedule a Dramatiq task to send a reminder for this appointment"""
 
         # Calculate the correct time to send this reminder
-        appointment_time = arrow.get(self.appointment_time)
-        reminder_time = appointment_time.shift(minutes=-5)
-        now = arrow.now()
-        milli_to_wait = int((reminder_time - now).total_seconds()) * 1000
+        # appointment_time = arrow.get(self.appointment_time)
+        # reminder_time = appointment_time.shift(minutes=-5)
+        # now = arrow.now()
+        # milli_to_wait = int((reminder_time - now).total_seconds()) * 1000
         # Schedule the Dramatiq task
         from .tasks import send_sms_reminder
 
