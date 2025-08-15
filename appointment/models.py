@@ -32,12 +32,12 @@ class Appointment(TimeStampedModel):
         # reminder_time = appointment_time.shift(minutes=-5)
         # now = arrow.now()
         # milli_to_wait = int((reminder_time - now).total_seconds()) * 1000
+        milli_to_wait = 0
         # Schedule the Dramatiq task
         from .tasks import send_sms_reminder
 
         result = send_sms_reminder.send_with_options(
-            args=(self.pk,),
-            # delay=milli_to_wait
+            args=(self.pk,), delay=milli_to_wait
         )
 
         return result.options["redis_message_id"]
