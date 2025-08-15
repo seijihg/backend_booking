@@ -1,8 +1,9 @@
-from rest_framework import serializers
 from phonenumber_field.serializerfields import PhoneNumberField
+from rest_framework import serializers
 
 from address.models import Address
 from address.serializers import AddressSerializer
+
 from .models import Salon
 
 

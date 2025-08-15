@@ -1,21 +1,19 @@
-from django.http import JsonResponse
-from rest_framework import status, permissions
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LoginView
-from rest_framework.pagination import PageNumberPagination
+from django.http import JsonResponse
+from rest_framework import status
 from rest_framework.generics import (
+    ListAPIView,
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
-    ListAPIView,
 )
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from user.serializers import CustomerSerializer, UserCreateSerializer, UserSerializer
 
-from user.serializers import UserCreateSerializer, UserSerializer, CustomerSerializer
-from user.permissions import IsTokenOwnerOrAdmin
-from .models import Customer, ExtendedUser
 from .helpers import generate_tokens
+from .models import Customer, ExtendedUser
 
 
 # Create your views here.

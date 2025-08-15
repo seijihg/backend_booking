@@ -1,8 +1,8 @@
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from datetime import datetime
 
-from appointment.serializers import AppointmentSerializer
-from appointment.serializers import Appointment
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+
+from appointment.serializers import Appointment, AppointmentSerializer
 
 
 # Create your views here.

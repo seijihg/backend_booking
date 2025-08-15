@@ -1,9 +1,8 @@
 from django.db import models
-
 from django_extensions.db.models import TimeStampedModel
 
-from booking_api.models import CommonInfo
 from address.models import Address
+from booking_api.models import CommonInfo
 
 
 # Create your models here.
