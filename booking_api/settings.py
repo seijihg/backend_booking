@@ -10,10 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-from datetime import timedelta
 import os
-import environ
+from datetime import timedelta
+
 import dj_database_url
+import environ
 
 env = environ.Env(
     # set casting, default value
@@ -42,6 +43,8 @@ CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = [
     "https://localhost:3001",
+    "https://booking-nails.vercel.app",
+    "https://book.lichnails.co.uk",  # Future domain if you migrate
 ]
 
 
@@ -162,7 +165,7 @@ AUTH_USER_MODEL = "user.ExtendedUser"
 SITE_ID = 1
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
-ACCOUNT_LOGIN_METHODS  = {'email'}
+ACCOUNT_LOGIN_METHODS = {'email'}
 REST_USE_JWT = True
 
 SIMPLE_JWT = {
@@ -183,7 +186,7 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 5,  # Specify the number of items per page
 }
 
-if DEBUG == True:
+if DEBUG is True:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 REDIS_URL = os.environ.get("REDIS_URL")
