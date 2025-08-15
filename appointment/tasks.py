@@ -1,7 +1,7 @@
 import arrow
 import dramatiq
-from twilio.rest import Client
 from django.conf import settings
+from twilio.rest import Client
 
 from appointment.models import Appointment
 
@@ -35,7 +35,7 @@ def send_sms_reminder(booking_id, cancelled_info=None):
         if not customer:
             customer = "Customer"
 
-        body = f'Hi {customer}, You have an appointment coming up at {appointment_time.format("YYYY-MM-DD h:mm a")}.'
+        body = f'Hi {customer}, You have an appointment coming up at {appointment_time.format("YYYY-MM-DD h:mm a")}. Regards USA Nails.'
 
         client.messages.create(
             body=body,

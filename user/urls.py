@@ -1,11 +1,12 @@
 from django.urls import path
+
 from user.views import (
-    CustomRegisterView,
-    CustomLoginView,
     CustomerDetailView,
+    CustomerListCreateAPIView,
+    CustomLoginView,
+    CustomRegisterView,
     UserDetails,
     UserListView,
-    CustomerListCreateAPIView,
 )
 
 app_name = "user"

@@ -1,10 +1,8 @@
-from typing import Dict
-
-from rest_framework import serializers
-from phonenumber_field.serializerfields import PhoneNumberField
 from dj_rest_auth.registration.serializers import RegisterSerializer
+from phonenumber_field.serializerfields import PhoneNumberField
+from rest_framework import serializers
 
-from .models import ExtendedUser, Customer
+from .models import Customer, ExtendedUser
 
 
 class UserCreateSerializer(RegisterSerializer):

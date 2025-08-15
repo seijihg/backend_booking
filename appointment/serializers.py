@@ -1,5 +1,5 @@
-from rest_framework import serializers
 import arrow
+from rest_framework import serializers
 
 from appointment.models import Appointment
 

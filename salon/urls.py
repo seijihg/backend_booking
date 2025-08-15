@@ -1,5 +1,6 @@
 from django.urls import path
-from salon.views import SalonListCreateAPIView, SalonDetailUpdateDeleteView
+
+from salon.views import SalonDetailUpdateDeleteView, SalonListCreateAPIView
 
 app_name = "salon"
 

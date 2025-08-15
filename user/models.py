@@ -1,11 +1,13 @@
-from django.db import models
-from django_extensions.db.models import TimeStampedModel
+from typing import ClassVar
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.db import models
+from django_extensions.db.models import TimeStampedModel
 
-from salon.models import Salon
-from booking_api.models import CommonInfo
 from address.models import Address
+from booking_api.models import CommonInfo
+from salon.models import Salon
 
 
 # Create your models here.
@@ -52,7 +54,7 @@ class ExtendedUser(AbstractUser, PermissionsMixin, TimeStampedModel, CommonInfo)
     objects = CustomAccountManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS: ClassVar[list[str]] = []
 
     def __str__(self) -> str:
         return self.email
