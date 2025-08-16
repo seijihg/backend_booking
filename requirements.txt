@@ -51,7 +51,7 @@ django==5.2
     #   django-phonenumber-field
     #   djangorestframework
     #   djangorestframework-simplejwt
-django-allauth==65.7.0
+django-allauth==65.11.0
     # via -r requirements.in
 django-cors-headers==4.7.0
     # via -r requirements.in
