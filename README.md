@@ -6,6 +6,10 @@ pip-compile requirements.in
 pip install -r requirements.txt
 ```
 
+```
+docker compose run --rm --service-ports web python manage.py runserver 0.0.0.0:8000
+```
+
 # Database Seeding
 
 This project includes a management command to seed the database with initial data.

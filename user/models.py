@@ -28,6 +28,8 @@ class CustomAccountManager(BaseUserManager):
 
     def create_user(self, email, password, **kwargs):
         kwargs.setdefault("is_superuser", False)
+        kwargs.setdefault("is_staff", False)
+        kwargs.setdefault("is_owner", False)
 
         return self._create_user(email, password, **kwargs)
 
@@ -47,7 +49,7 @@ class ExtendedUser(AbstractUser, PermissionsMixin, TimeStampedModel, CommonInfo)
         help_text="Designates whether the user is the owner.",
     )
     username = None
-    salon = models.ForeignKey(Salon, on_delete=models.SET_NULL, null=True, blank=True)
+    salons = models.ManyToManyField(Salon, blank=True, related_name='users')
     addresses = models.ManyToManyField(Address, blank=True)
     full_name = models.CharField(max_length=150, blank=True)
 
@@ -58,11 +60,3 @@ class ExtendedUser(AbstractUser, PermissionsMixin, TimeStampedModel, CommonInfo)
 
     def __str__(self) -> str:
         return self.email
-
-
-class Customer(TimeStampedModel, CommonInfo):
-    full_name = models.CharField(max_length=150, blank=True)
-    salon = models.ForeignKey(Salon, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"{self.full_name} {self.phone_number}"

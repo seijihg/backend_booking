@@ -8,7 +8,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Changed host port to 5433 to avoid conflict with local PostgreSQL
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U booking_user -d booking_db"]
       interval: 10s
@@ -45,10 +45,12 @@ services:
       - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER:-}
       # Seed data
       - SEED_SALON_NAME=${SEED_SALON_NAME:-Default Salon}
+      - SEED_SALON_PHONE_NUMBER=${SEED_SALON_PHONE_NUMBER:-+447700900000}
       - SEED_SALON_STREET=${SEED_SALON_STREET:-123 Default St}
       - SEED_SALON_CITY=${SEED_SALON_CITY:-London}
       - SEED_SALON_POSTAL_CODE=${SEED_SALON_POSTAL_CODE:-SW1A 1AA}
       - SEED_OWNER_EMAIL=${SEED_OWNER_EMAIL:-owner@example.com}
+      - SEED_OWNER_PHONE_NUMBER=${SEED_OWNER_PHONE_NUMBER:-+447700900001}
       - SEED_OWNER_FIRST_NAME=${SEED_OWNER_FIRST_NAME:-Default}
       - SEED_OWNER_LAST_NAME=${SEED_OWNER_LAST_NAME:-Owner}
       - SEED_OWNER_FULL_NAME=${SEED_OWNER_FULL_NAME:-Default Owner}
@@ -75,10 +77,12 @@ services:
       - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER:-}
       # Seed data
       - SEED_SALON_NAME=${SEED_SALON_NAME:-Default Salon}
+      - SEED_SALON_PHONE_NUMBER=${SEED_SALON_PHONE_NUMBER:-+447700900000}
       - SEED_SALON_STREET=${SEED_SALON_STREET:-123 Default St}
       - SEED_SALON_CITY=${SEED_SALON_CITY:-London}
       - SEED_SALON_POSTAL_CODE=${SEED_SALON_POSTAL_CODE:-SW1A 1AA}
       - SEED_OWNER_EMAIL=${SEED_OWNER_EMAIL:-owner@example.com}
+      - SEED_OWNER_PHONE_NUMBER=${SEED_OWNER_PHONE_NUMBER:-+447700900001}
       - SEED_OWNER_FIRST_NAME=${SEED_OWNER_FIRST_NAME:-Default}
       - SEED_OWNER_LAST_NAME=${SEED_OWNER_LAST_NAME:-Owner}
       - SEED_OWNER_FULL_NAME=${SEED_OWNER_FULL_NAME:-Default Owner}
@@ -101,10 +105,12 @@ services:
       - DJANGO_SECRET_KEY=your-secret-key-here-change-in-production
       # Seed data
       - SEED_SALON_NAME=${SEED_SALON_NAME:-Default Salon}
+      - SEED_SALON_PHONE_NUMBER=${SEED_SALON_PHONE_NUMBER:-+447700900000}
       - SEED_SALON_STREET=${SEED_SALON_STREET:-123 Default St}
       - SEED_SALON_CITY=${SEED_SALON_CITY:-London}
       - SEED_SALON_POSTAL_CODE=${SEED_SALON_POSTAL_CODE:-SW1A 1AA}
       - SEED_OWNER_EMAIL=${SEED_OWNER_EMAIL:-owner@example.com}
+      - SEED_OWNER_PHONE_NUMBER=${SEED_OWNER_PHONE_NUMBER:-+447700900001}
       - SEED_OWNER_FIRST_NAME=${SEED_OWNER_FIRST_NAME:-Default}
       - SEED_OWNER_LAST_NAME=${SEED_OWNER_LAST_NAME:-Owner}
       - SEED_OWNER_FULL_NAME=${SEED_OWNER_FULL_NAME:-Default Owner}
