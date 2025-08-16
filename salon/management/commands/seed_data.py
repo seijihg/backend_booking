@@ -16,11 +16,13 @@ class Command(BaseCommand):
 
         # Get seed data from environment variables
         salon_name = os.environ.get('SEED_SALON_NAME', 'Default Salon')
+        salon_phone_number = os.environ.get('SEED_SALON_PHONE_NUMBER', '+447700900000')
         salon_street = os.environ.get('SEED_SALON_STREET', '123 Default St')
         salon_city = os.environ.get('SEED_SALON_CITY', 'London')
         salon_postal_code = os.environ.get('SEED_SALON_POSTAL_CODE', 'SW1A 1AA')
 
         owner_email = os.environ.get('SEED_OWNER_EMAIL', 'owner@example.com')
+        owner_phone_number = os.environ.get('SEED_OWNER_PHONE_NUMBER', '+447700900001')
         owner_first_name = os.environ.get('SEED_OWNER_FIRST_NAME', 'Default')
         owner_last_name = os.environ.get('SEED_OWNER_LAST_NAME', 'Owner')
         owner_full_name = os.environ.get('SEED_OWNER_FULL_NAME', 'Default Owner')
@@ -58,7 +60,7 @@ class Command(BaseCommand):
 
                 # Create salon
                 salon, created = Salon.objects.get_or_create(
-                    name=salon_name, defaults={}
+                    name=salon_name, defaults={'phone_number': salon_phone_number}
                 )
                 if created:
                     salon.addresses.add(address)
@@ -83,9 +85,10 @@ class Command(BaseCommand):
                         'first_name': owner_first_name,
                         'last_name': owner_last_name,
                         'full_name': owner_full_name,
+                        'phone_number': owner_phone_number,
+                        'is_superuser': True,
                         'is_owner': True,
                         'is_staff': True,
-                        'salon': salon,
                     },
                 )
 
@@ -93,6 +96,8 @@ class Command(BaseCommand):
                     # Set a default password for the new user
                     user.set_password(owner_password)
                     user.save()
+                    # Add user to salon
+                    user.salons.add(salon)
                     self.stdout.write(
                         self.style.SUCCESS(
                             f'Created owner user: {user.full_name} ({user.email})'
@@ -107,21 +112,23 @@ class Command(BaseCommand):
                     self.stdout.write(
                         self.style.WARNING(f'User already exists: {user.email}')
                     )
-                    # Update salon association if needed
-                    if user.salon != salon:
-                        user.salon = salon
-                        user.save()
+                    # Add salon to user if not already associated
+                    if not user.salons.filter(id=salon.pk).exists():
+                        user.salons.add(salon)
                         self.stdout.write(
-                            self.style.SUCCESS('Updated user salon association')
+                            self.style.SUCCESS('Added salon to existing user')
                         )
 
                 # Summary
                 self.stdout.write(self.style.SUCCESS('\n=== Seeding Complete ==='))
                 self.stdout.write(f'Salon: {salon.name}')
+                self.stdout.write(f'Phone Number: {salon.phone_number}')
                 self.stdout.write(
                     f'Address: {address.street}, {address.city} {address.postal_code}'
                 )
-                self.stdout.write(f'Owner: {user.full_name} ({user.email})')
+                self.stdout.write(
+                    f'Owner: {user.full_name} ({user.email}) ({user.phone_number})'
+                )
                 self.stdout.write(self.style.SUCCESS('========================\n'))
 
         except Exception as e:

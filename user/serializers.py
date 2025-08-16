@@ -17,8 +17,7 @@ class UserCreateSerializer(RegisterSerializer):
     phone_number = PhoneNumberField(required=True, allow_blank=False, region="GB")
     salons = serializers.ListField(
         child=serializers.IntegerField(),
-        required=False,
-        allow_empty=True,
+        required=True,
         help_text="List of salon IDs the user belongs to",
     )
 
