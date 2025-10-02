@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     "salon",
     "address",
     "appointment",
+    "customer",
 ]
 
 MIDDLEWARE = [
