@@ -2,18 +2,14 @@ from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LoginView
 from django.http import JsonResponse
 from rest_framework import status
-from rest_framework.generics import (
-    ListAPIView,
-    ListCreateAPIView,
-    RetrieveUpdateDestroyAPIView,
-)
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from user.serializers import CustomerSerializer, UserCreateSerializer, UserSerializer
+from user.serializers import UserCreateSerializer, UserSerializer
 
 from .helpers import generate_tokens
-from .models import Customer, ExtendedUser
+from .models import ExtendedUser
 
 
 # Create your views here.
@@ -77,15 +73,9 @@ class CustomLoginView(LoginView):
 
 class UserListView(ListAPIView):
     # permission_classes = [permissions.IsAdminUser]  # Field is_staff = True
-    # pagination_class = PageNumberPagination
-
     def get(self, request):
         salon_id = request.query_params.get("salon")
-        users = ExtendedUser.objects.filter(salon=salon_id)
-        # paginator = self.pagination_class()
-        # paginated_users = paginator.paginate_queryset(users, request)
-        # serializer = UserSerializer(paginated_users, many=True)
-        # return paginator.get_paginated_response(serializer.data)
+        users = ExtendedUser.objects.filter(salons=salon_id)
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
@@ -122,13 +112,3 @@ class UserDetails(APIView):
             return Response(serializer.data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class CustomerListCreateAPIView(ListCreateAPIView):
-    queryset = Customer.objects.all()
-    serializer_class = CustomerSerializer
-
-
-class CustomerDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = Customer.objects.all()
-    serializer_class = CustomerSerializer
