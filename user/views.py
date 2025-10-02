@@ -73,10 +73,9 @@ class CustomLoginView(LoginView):
 
 class UserListView(ListAPIView):
     # permission_classes = [permissions.IsAdminUser]  # Field is_staff = True
-
     def get(self, request):
         salon_id = request.query_params.get("salon")
-        users = ExtendedUser.objects.filter(salon=salon_id)
+        users = ExtendedUser.objects.filter(salons=salon_id)
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
