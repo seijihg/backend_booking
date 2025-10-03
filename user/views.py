@@ -29,8 +29,14 @@ class CustomRegisterView(RegisterView):
             }
 
             response = JsonResponse(response_data, status=status.HTTP_201_CREATED)
-            # Set refresh token as an HTTP-only cookie
-            response.set_cookie("refresh_token", tokens["refresh_token"], httponly=True)
+            # Set refresh token as an HTTP-only cookie with security flags
+            response.set_cookie(
+                "refresh_token",
+                tokens["refresh_token"],
+                httponly=True,
+                secure=True,
+                samesite="None",
+            )
 
             return response
 
@@ -44,7 +50,6 @@ class CustomLoginView(LoginView):
             # Exclude tokens from the response data
             response.data.pop("access_token", None)
             response.data.pop("refresh_token", None)
-
         return response
 
     def post(self, request, *args, **kwargs):
@@ -57,13 +62,25 @@ class CustomLoginView(LoginView):
 
             user_serializer = UserSerializer(user)
             response.data["user"] = user_serializer.data
-            response.data["access_token"] = tokens["access_token"]
+
+            # ✅ Set access token cookie (named "token" to match frontend)
+            response.set_cookie(
+                "token",
+                tokens["access_token"],
+                httponly=True,
+                secure=True,
+                samesite="None",  # Change to "Lax" if same-origin
+                max_age=3600,
+            )
+
+            # ✅ Set refresh token cookie
             response.set_cookie(
                 "refresh_token",
                 tokens["refresh_token"],
                 httponly=True,
                 secure=True,
-                samesite="None",
+                samesite="None",  # Change to "Lax" if same-origin
+                max_age=604800,
             )
 
             return response
