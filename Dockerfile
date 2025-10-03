@@ -36,6 +36,10 @@ WORKDIR /app
 # Copy application code
 COPY --chown=django:django . .
 
+# Copy and set permissions for entrypoint script
+COPY --chown=django:django entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 # Switch to non-root user
 USER django
 
@@ -58,6 +62,9 @@ EXPOSE 8000
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/')"
+
+# Set entrypoint to run migrations before starting app
+ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Run gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--threads", "2", "--timeout", "120", "booking_api.wsgi:application"]
