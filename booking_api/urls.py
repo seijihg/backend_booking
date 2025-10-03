@@ -27,7 +27,13 @@ def health_check(request):
     return JsonResponse({"status": "healthy"}, status=200)
 
 
+def root(request):
+    """Root endpoint"""
+    return JsonResponse({"status": "ok"}, status=200)
+
+
 urlpatterns = [
+    path("", root, name="root"),
     path("admin/", admin.site.urls),
     path("health/", health_check, name="health_check"),
     path("users/", include("user.urls")),
