@@ -1,3 +1,5 @@
+import logging
+
 import arrow
 import dramatiq
 from django.conf import settings
@@ -5,6 +7,7 @@ from twilio.rest import Client
 
 from appointment.models import Appointment
 
+logger = logging.getLogger(__name__)
 client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 
 
@@ -30,7 +33,7 @@ def send_sms_reminder(booking_id, cancelled_info=None):
             return
 
         appointment_time = arrow.get(appointment.appointment_time)
-        customer = appointment.user.full_name
+        customer = appointment.customer.full_name
 
         if not customer:
             customer = "Customer"
@@ -39,6 +42,7 @@ def send_sms_reminder(booking_id, cancelled_info=None):
 
         client.messages.create(
             body=body,
-            to=str(appointment.user.phone_number),
+            to=str(appointment.customer.phone_number),
             from_=settings.TWILIO_PHONE_NUMBER,
         )
+        # TODO another reminder to the Owner that there is a booking

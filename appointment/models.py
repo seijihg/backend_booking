@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db import models
 from django_extensions.db.models import TimeStampedModel
 
+from customer.models import Customer
 from salon.models import Salon
 from user.models import ExtendedUser
 
@@ -12,6 +13,7 @@ from user.models import ExtendedUser
 class Appointment(TimeStampedModel):
     salon = models.ForeignKey(Salon, on_delete=models.CASCADE)
     user = models.ForeignKey(ExtendedUser, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     appointment_time = models.DateTimeField()
     comment = models.TextField(blank=True, default="")
     column_id = models.IntegerField(default=1)
@@ -38,7 +40,6 @@ class Appointment(TimeStampedModel):
         result = send_sms_reminder.send_with_options(
             args=(self.pk,), delay=milli_to_wait
         )
-
         return result.options["redis_message_id"]
 
     def cancel_task(self):
@@ -57,7 +58,7 @@ class Appointment(TimeStampedModel):
         # which is used in schedule_reminder
         super().save(*args, **kwargs)
 
-        if self.user.phone_number:
+        if self.customer.phone_number:
             # Schedule a new reminder task for this appointment
             self.task_id = self.schedule_reminder()
 
@@ -68,7 +69,7 @@ class Appointment(TimeStampedModel):
         from .tasks import send_sms_reminder
 
         time_date = arrow.get(self.appointment_time).format("YYYY-MM-DD h:mm a")
-        phone_number = str(self.user.phone_number)
+        phone_number = str(self.customer.phone_number)
         result = send_sms_reminder.send(
             self.pk, {"time_date": time_date, "phone_number": phone_number}
         )
