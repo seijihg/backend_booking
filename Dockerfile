@@ -1,5 +1,5 @@
 # Multi-stage build for optimized image size
-FROM python:3.11-slim as builder
+FROM public.ecr.aws/docker/library/python:3.11-slim as builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
@@ -17,7 +17,7 @@ COPY requirements.txt .
 RUN pip install --user --no-cache-dir --no-compile -r requirements.txt
 
 # Production stage
-FROM python:3.11-slim
+FROM public.ecr.aws/docker/library/python:3.11-slim
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \
@@ -57,7 +57,7 @@ EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/')"
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/')"
 
 # Run gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--threads", "2", "--timeout", "120", "booking_api.wsgi:application"]
