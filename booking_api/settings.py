@@ -43,9 +43,8 @@ ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
 # CIDR networks allowed to access the application
 ALLOWED_CIDR_NETS = ["10.0.10.0/24"]
 
-CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = [
+CORS_ALLOWED_ORIGINS = [
     "https://localhost:3001",
     "https://usa-berko.lichnails.co.uk",
 ]
