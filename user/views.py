@@ -29,13 +29,27 @@ class CustomRegisterView(RegisterView):
             }
 
             response = JsonResponse(response_data, status=status.HTTP_201_CREATED)
-            # Set refresh token as an HTTP-only cookie with security flags
+
+            # ✅ Set access token cookie (named "token" to match frontend)
+            response.set_cookie(
+                "token",
+                tokens["access_token"],
+                httponly=True,
+                secure=True,
+                samesite="None",  # Required for cross-origin (different subdomains)
+                domain=".lichnails.co.uk",  # Share cookie across subdomains
+                max_age=3600,
+            )
+
+            # ✅ Set refresh token cookie
             response.set_cookie(
                 "refresh_token",
                 tokens["refresh_token"],
                 httponly=True,
                 secure=True,
-                samesite="None",
+                samesite="None",  # Required for cross-origin (different subdomains)
+                domain=".lichnails.co.uk",  # Share cookie across subdomains
+                max_age=604800,
             )
 
             return response
@@ -69,7 +83,8 @@ class CustomLoginView(LoginView):
                 tokens["access_token"],
                 httponly=True,
                 secure=True,
-                samesite="None",  # Change to "Lax" if same-origin
+                samesite="None",  # Required for cross-origin (different subdomains)
+                domain=".lichnails.co.uk",  # Share cookie across subdomains
                 max_age=3600,
             )
 
@@ -79,7 +94,8 @@ class CustomLoginView(LoginView):
                 tokens["refresh_token"],
                 httponly=True,
                 secure=True,
-                samesite="None",  # Change to "Lax" if same-origin
+                samesite="None",  # Required for cross-origin (different subdomains)
+                domain=".lichnails.co.uk",  # Share cookie across subdomains
                 max_age=604800,
             )
 

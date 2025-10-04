@@ -44,8 +44,13 @@ CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = [
     "https://localhost:3001",
-    "https://booking-nails.vercel.app",
-    "https://book.lichnails.co.uk",  # Future domain if you migrate
+    "https://usa-berko.lichnails.co.uk",
+]
+
+# Update CSRF Trusted Origins
+CSRF_TRUSTED_ORIGINS = [
+    "https://localhost:3001",
+    "https://usa-berko.lichnails.co.uk",
 ]
 
 
