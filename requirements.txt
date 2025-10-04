@@ -45,6 +45,7 @@ django==5.2
     #   dj-database-url
     #   dj-rest-auth
     #   django-allauth
+    #   django-allow-cidr
     #   django-cors-headers
     #   django-dramatiq
     #   django-extensions
@@ -52,6 +53,8 @@ django==5.2
     #   djangorestframework
     #   djangorestframework-simplejwt
 django-allauth==65.11.0
+    # via -r requirements.in
+django-allow-cidr==0.8.0
     # via -r requirements.in
 django-cors-headers==4.7.0
     # via -r requirements.in
