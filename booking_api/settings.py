@@ -40,12 +40,20 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
 
+# CIDR networks allowed to access the application
+ALLOWED_CIDR_NETS = ["10.0.10.0/24"]
+
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = [
     "https://localhost:3001",
-    "https://booking-nails.vercel.app",
-    "https://book.lichnails.co.uk",  # Future domain if you migrate
+    "https://usa-berko.lichnails.co.uk",
+]
+
+# Update CSRF Trusted Origins
+CSRF_TRUSTED_ORIGINS = [
+    "https://localhost:3001",
+    "https://usa-berko.lichnails.co.uk",
 ]
 
 
@@ -79,6 +87,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "allow_cidr.middleware.AllowCIDRMiddleware",  # Must be first
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
