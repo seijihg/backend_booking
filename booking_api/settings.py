@@ -77,7 +77,7 @@ INSTALLED_APPS = [
     "dj_rest_auth.registration",
     "phonenumber_field",
     "django_dramatiq",
-    "booking_api",
+    "booking_api.apps.BookingApiConfig",
     "user",
     "salon",
     "address",
@@ -201,6 +201,16 @@ if DEBUG is True:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 REDIS_URL = os.environ.get("REDIS_URL")
+
+# Cache configuration using Redis
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": REDIS_URL,
+        "KEY_PREFIX": "booking_api",
+        "TIMEOUT": 300,  # 5 minutes default timeout
+    }
+}
 
 DRAMATIQ_BROKER = {
     "BROKER": "dramatiq.brokers.redis.RedisBroker",
