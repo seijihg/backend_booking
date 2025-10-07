@@ -16,14 +16,7 @@ class BookingApiConfig(AppConfig):
         Run once at Django startup.
 
         This method is called when Django starts and is used to perform
-        one-time initialization tasks like health checks for external services.
+        one-time initialization tasks.
         """
-        # Import here to avoid AppRegistryNotReady error
-        # Only run health checks if not running migrations or other management commands
-        # that don't need external services
-        import sys
-
-        from .healthchecks import run_startup_health_checks
-
-        if 'runserver' in sys.argv or 'gunicorn' in sys.argv[0]:
-            run_startup_health_checks()
+        # Import signal handlers or other startup code here if needed
+        pass
