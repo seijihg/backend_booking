@@ -93,33 +93,5 @@ services:
       redis:
         condition: service_healthy
 
-  # Development helper service for database migrations
-  migrate:
-    build: .
-    command: python manage.py migrate
-    volumes:
-      - .:/app
-    environment:
-      - DATABASE_URL=postgresql://booking_user:booking_password@db:5432/booking_db
-      - REDIS_URL=redis://redis:6379/0
-      - DJANGO_SECRET_KEY=your-secret-key-here-change-in-production
-      # Seed data
-      - SEED_SALON_NAME=${SEED_SALON_NAME:-Default Salon}
-      - SEED_SALON_PHONE_NUMBER=${SEED_SALON_PHONE_NUMBER:-+447700900000}
-      - SEED_SALON_STREET=${SEED_SALON_STREET:-123 Default St}
-      - SEED_SALON_CITY=${SEED_SALON_CITY:-London}
-      - SEED_SALON_POSTAL_CODE=${SEED_SALON_POSTAL_CODE:-SW1A 1AA}
-      - SEED_OWNER_EMAIL=${SEED_OWNER_EMAIL:-owner@example.com}
-      - SEED_OWNER_PHONE_NUMBER=${SEED_OWNER_PHONE_NUMBER:-+447700900001}
-      - SEED_OWNER_FIRST_NAME=${SEED_OWNER_FIRST_NAME:-Default}
-      - SEED_OWNER_LAST_NAME=${SEED_OWNER_LAST_NAME:-Owner}
-      - SEED_OWNER_FULL_NAME=${SEED_OWNER_FULL_NAME:-Default Owner}
-      - SEED_OWNER_DEFAULT_PASSWORD=${SEED_OWNER_DEFAULT_PASSWORD:-defaultpass123}
-    depends_on:
-      db:
-        condition: service_healthy
-    profiles:
-      - tools
-
 volumes:
   postgres_data:
