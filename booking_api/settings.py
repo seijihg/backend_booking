@@ -41,7 +41,7 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
 
 # CIDR networks allowed to access the application
-ALLOWED_CIDR_NETS = ["10.0.10.0/24"]
+ALLOWED_CIDR_NETS = ["10.0.0.0/16"]
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
