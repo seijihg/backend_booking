@@ -45,12 +45,14 @@ ALLOWED_CIDR_NETS = ["10.0.0.0/16"]
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
     "https://localhost:3001",
     "https://usa-berko.lichnails.co.uk",
 ]
 
 # Update CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
     "https://localhost:3001",
     "https://usa-berko.lichnails.co.uk",
 ]

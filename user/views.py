@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 
 from user.serializers import UserCreateSerializer, UserSerializer
 
+from .cookie_config import set_auth_cookies
 from .helpers import generate_tokens
 from .models import ExtendedUser
 
@@ -30,27 +31,8 @@ class CustomRegisterView(RegisterView):
 
             response = JsonResponse(response_data, status=status.HTTP_201_CREATED)
 
-            # ✅ Set access token cookie (named "token" to match frontend)
-            response.set_cookie(
-                "token",
-                tokens["access_token"],
-                httponly=True,
-                secure=True,
-                samesite="None",  # Required for cross-origin (different subdomains)
-                domain=".lichnails.co.uk",  # Share cookie across subdomains
-                max_age=3600,
-            )
-
-            # ✅ Set refresh token cookie
-            response.set_cookie(
-                "refresh_token",
-                tokens["refresh_token"],
-                httponly=True,
-                secure=True,
-                samesite="None",  # Required for cross-origin (different subdomains)
-                domain=".lichnails.co.uk",  # Share cookie across subdomains
-                max_age=604800,
-            )
+            # Set authentication cookies with environment-appropriate settings
+            set_auth_cookies(response, tokens["access_token"], tokens["refresh_token"])
 
             return response
 
@@ -77,27 +59,8 @@ class CustomLoginView(LoginView):
             user_serializer = UserSerializer(user)
             response.data["user"] = user_serializer.data
 
-            # ✅ Set access token cookie (named "token" to match frontend)
-            response.set_cookie(
-                "token",
-                tokens["access_token"],
-                httponly=True,
-                secure=True,
-                samesite="None",  # Required for cross-origin (different subdomains)
-                domain=".lichnails.co.uk",  # Share cookie across subdomains
-                max_age=3600,
-            )
-
-            # ✅ Set refresh token cookie
-            response.set_cookie(
-                "refresh_token",
-                tokens["refresh_token"],
-                httponly=True,
-                secure=True,
-                samesite="None",  # Required for cross-origin (different subdomains)
-                domain=".lichnails.co.uk",  # Share cookie across subdomains
-                max_age=604800,
-            )
+            # Set authentication cookies with environment-appropriate settings
+            set_auth_cookies(response, tokens["access_token"], tokens["refresh_token"])
 
             return response
 

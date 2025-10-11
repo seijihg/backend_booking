@@ -17,9 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import include, path
-from rest_framework_simplejwt.views import (
-    TokenRefreshView,
-)
+
+from user.token_views import CustomTokenRefreshView, LogoutView
 
 
 def health_check(request):
@@ -37,7 +36,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("health/", health_check, name="health_check"),
     path("users/", include("user.urls")),
-    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("token/refresh/", CustomTokenRefreshView.as_view(), name="token_refresh"),
+    path("logout/", LogoutView.as_view(), name="logout"),
     path("salons/", include("salon.urls")),
     path("appointments/", include("appointment.urls")),
     path("customers/", include("customer.urls")),
