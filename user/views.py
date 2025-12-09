@@ -1,6 +1,6 @@
 from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LoginView
-from django.http import JsonResponse
+from django.conf import settings
 from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
@@ -19,7 +19,7 @@ class CustomRegisterView(RegisterView):
     def post(self, request, format=None, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            user = serializer.save(self.request)
+            user = serializer.save(request=self.request)
             user_serializer = UserSerializer(user)
             tokens = generate_tokens(user)
 
@@ -28,7 +28,7 @@ class CustomRegisterView(RegisterView):
                 "access_token": tokens["access_token"],
             }
 
-            response = JsonResponse(response_data, status=status.HTTP_201_CREATED)
+            response = Response(response_data, status=status.HTTP_201_CREATED)
 
             # ✅ Set access token cookie (named "token" to match frontend)
             response.set_cookie(
@@ -37,7 +37,7 @@ class CustomRegisterView(RegisterView):
                 httponly=True,
                 secure=True,
                 samesite="None",  # Required for cross-origin (different subdomains)
-                domain=".lichnails.co.uk",  # Share cookie across subdomains
+                domain=settings.COOKIE_DOMAIN,
                 max_age=3600,
             )
 
@@ -48,7 +48,7 @@ class CustomRegisterView(RegisterView):
                 httponly=True,
                 secure=True,
                 samesite="None",  # Required for cross-origin (different subdomains)
-                domain=".lichnails.co.uk",  # Share cookie across subdomains
+                domain=settings.COOKIE_DOMAIN,
                 max_age=604800,
             )
 
@@ -84,7 +84,7 @@ class CustomLoginView(LoginView):
                 httponly=True,
                 secure=True,
                 samesite="None",  # Required for cross-origin (different subdomains)
-                domain=".lichnails.co.uk",  # Share cookie across subdomains
+                domain=settings.COOKIE_DOMAIN,
                 max_age=3600,
             )
 
@@ -95,7 +95,7 @@ class CustomLoginView(LoginView):
                 httponly=True,
                 secure=True,
                 samesite="None",  # Required for cross-origin (different subdomains)
-                domain=".lichnails.co.uk",  # Share cookie across subdomains
+                domain=settings.COOKIE_DOMAIN,
                 max_age=604800,
             )
 

@@ -34,6 +34,9 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 DEBUG = env("DEBUG")
 DEVELOPMENT_MODE = env("DEVELOPMENT_MODE")
 
+# Cookie domain for cross-subdomain sharing (None for local development)
+COOKIE_DOMAIN = None if DEVELOPMENT_MODE else ".lichnails.co.uk"
+
 # Raises Django's ImproperlyConfigured
 # exception if SECRET_KEY not in os.environ
 SECRET_KEY = env("DJANGO_SECRET_KEY")
@@ -45,12 +48,14 @@ ALLOWED_CIDR_NETS = ["10.0.0.0/16"]
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
     "https://localhost:3001",
     "https://usa-berko.lichnails.co.uk",
 ]
 
 # Update CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
     "https://localhost:3001",
     "https://usa-berko.lichnails.co.uk",
 ]

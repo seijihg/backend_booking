@@ -36,8 +36,8 @@ class UserCreateSerializer(RegisterSerializer):
                 )
         return value
 
-    def save(self, request):
-        user = super().save(request)
+    def save(self, request=None, **kwargs):
+        user = super().save(request, **kwargs)
 
         user.phone_number = self.validated_data["phone_number"]
         user.save()

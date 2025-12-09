@@ -28,6 +28,7 @@ services:
 
   web:
     build: .
+    entrypoint: ""  # Skip entrypoint.sh for local development
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
@@ -63,6 +64,7 @@ services:
 
   worker:
     build: .
+    entrypoint: ""  # Skip entrypoint.sh for local development
     command: python manage.py rundramatiq
     volumes:
       - .:/app
