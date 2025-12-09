@@ -1,6 +1,5 @@
 from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LoginView
-from django.conf import settings
 from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
@@ -37,7 +36,7 @@ class CustomRegisterView(RegisterView):
                 httponly=True,
                 secure=True,
                 samesite="None",  # Required for cross-origin (different subdomains)
-                domain=settings.COOKIE_DOMAIN,
+                domain=".lichnails.co.uk",  # Share cookie across subdomains
                 max_age=3600,
             )
 
@@ -48,7 +47,7 @@ class CustomRegisterView(RegisterView):
                 httponly=True,
                 secure=True,
                 samesite="None",  # Required for cross-origin (different subdomains)
-                domain=settings.COOKIE_DOMAIN,
+                domain=".lichnails.co.uk",  # Share cookie across subdomains
                 max_age=604800,
             )
 
@@ -84,7 +83,7 @@ class CustomLoginView(LoginView):
                 httponly=True,
                 secure=True,
                 samesite="None",  # Required for cross-origin (different subdomains)
-                domain=settings.COOKIE_DOMAIN,
+                domain=".lichnails.co.uk",  # Share cookie across subdomains
                 max_age=3600,
             )
 
@@ -95,7 +94,7 @@ class CustomLoginView(LoginView):
                 httponly=True,
                 secure=True,
                 samesite="None",  # Required for cross-origin (different subdomains)
-                domain=settings.COOKIE_DOMAIN,
+                domain=".lichnails.co.uk",  # Share cookie across subdomains
                 max_age=604800,
             )
 

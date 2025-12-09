@@ -34,9 +34,6 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 DEBUG = env("DEBUG")
 DEVELOPMENT_MODE = env("DEVELOPMENT_MODE")
 
-# Cookie domain for cross-subdomain sharing (None for local development)
-COOKIE_DOMAIN = None if DEVELOPMENT_MODE else ".lichnails.co.uk"
-
 # Raises Django's ImproperlyConfigured
 # exception if SECRET_KEY not in os.environ
 SECRET_KEY = env("DJANGO_SECRET_KEY")
