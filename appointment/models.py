@@ -9,7 +9,6 @@ from salon.models import Salon
 from user.models import ExtendedUser
 
 
-# Create your models here.
 class Appointment(TimeStampedModel):
     salon = models.ForeignKey(Salon, on_delete=models.CASCADE)
     user = models.ForeignKey(ExtendedUser, on_delete=models.CASCADE)
@@ -18,23 +17,29 @@ class Appointment(TimeStampedModel):
     comment = models.TextField(blank=True, default="")
     column_id = models.IntegerField(default=1)
     end_time = models.DateTimeField(blank=True, null=True)
-
-    # Additional fields not visible to users
     task_id = models.CharField(max_length=50, blank=True, editable=False)
 
     def __str__(self):
-        return "Appointment #{0} - {1}".format(self.pk, self.user)
+        return f"Appointment #{self.pk} - {self.user}"
 
-    def schedule_reminder(self):
-        """Schedule a Dramatiq task to send a reminder for this appointment"""
+    def send_confirmation_sms(self):
+        """SMS #1: Send immediate confirmation."""
+        from .tasks import send_sms_confirmation
 
-        # Calculate the correct time to send this reminder
-        # appointment_time = arrow.get(self.appointment_time)
-        # reminder_time = appointment_time.shift(minutes=-5)
-        # now = arrow.now()
-        # milli_to_wait = int((reminder_time - now).total_seconds()) * 1000
-        milli_to_wait = 0
-        # Schedule the Dramatiq task
+        send_sms_confirmation.send(self.pk)
+
+    def schedule_reminder_sms(self):
+        """SMS #2: Schedule reminder X minutes before."""
+        reminder_minutes = self.salon.reminder_time_minutes
+        appointment_time = arrow.get(self.appointment_time)
+        reminder_time = appointment_time.shift(minutes=-reminder_minutes)
+        now = arrow.now()
+
+        milli_to_wait = int((reminder_time - now).total_seconds()) * 1000
+
+        if milli_to_wait <= 0:
+            return None
+
         from .tasks import send_sms_reminder
 
         result = send_sms_reminder.send_with_options(
@@ -43,43 +48,52 @@ class Appointment(TimeStampedModel):
         return result.options["redis_message_id"]
 
     def cancel_task(self):
+        """Cancel scheduled reminder task."""
+        if not self.task_id:
+            return
         redis_client = redis.Redis.from_url(settings.REDIS_URL)
         redis_client.hdel("dramatiq:default.DQ.msgs", self.task_id)
 
     def save(self, *args, **kwargs):
-        """Custom save method which also schedules a reminder"""
+        """Handle SMS on create or time change."""
+        is_new = self.pk is None
+        time_changed = False
 
-        # Check if we have scheduled a reminder for this appointment before
+        if not is_new:
+            old = Appointment.objects.get(pk=self.pk)
+            time_changed = old.appointment_time != self.appointment_time
+
+        # Cancel old reminder
         if self.task_id:
-            # Revoke that task in case its time has changed
             self.cancel_task()
 
-        # Save our appointment, which populates self.pk,
-        # which is used in schedule_reminder
         super().save(*args, **kwargs)
 
-        if self.customer.phone_number:
-            # Schedule a new reminder task for this appointment
-            self.task_id = self.schedule_reminder()
+        # Only send SMS if customer has phone number
+        if not self.customer.phone_number:
+            return
 
-            # Save our appointment again, with the new task_id
+        # SMS #1: Confirmation (new OR time changed)
+        if is_new or time_changed:
+            self.send_confirmation_sms()
+
+        # SMS #2: Reminder (always schedule/reschedule)
+        task_id = self.schedule_reminder_sms()
+        if task_id:
+            self.task_id = task_id
             Appointment.objects.filter(id=self.id).update(task_id=self.task_id)
 
-    def delete_reminder(self):
-        from .tasks import send_sms_reminder
-
-        time_date = arrow.get(self.appointment_time).format("YYYY-MM-DD h:mm a")
-        phone_number = str(self.customer.phone_number)
-        result = send_sms_reminder.send(
-            self.pk, {"time_date": time_date, "phone_number": phone_number}
-        )
-
-        return result.options["redis_message_id"]
-
     def delete(self, *args, **kwargs):
+        """Cancel reminder and send cancellation SMS."""
         if self.task_id:
             self.cancel_task()
 
-        self.delete_reminder()
+        from .tasks import send_sms_reminder
+
+        time_date = arrow.get(self.appointment_time).format("YYYY-MM-DD h:mm A")
+        send_sms_reminder.send(
+            self.pk,
+            {"time_date": time_date, "phone_number": str(self.customer.phone_number)},
+        )
 
         super().delete(*args, **kwargs)

@@ -10,5 +10,8 @@ class Salon(CommonInfo, TimeStampedModel):
     name = models.CharField(max_length=255)
     addresses = models.ManyToManyField(Address, blank=True)
 
+    # SMS Settings
+    reminder_time_minutes = models.PositiveIntegerField(default=60)
+
     def __str__(self):
         return self.name
