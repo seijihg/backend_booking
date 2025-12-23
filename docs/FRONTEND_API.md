@@ -343,6 +343,21 @@ DELETE /salons/{id}/
 
 ```http
 GET /customers/
+GET /customers/?salon={salon_id}
+```
+
+**Query Parameters:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `salon` | int | No | Filter customers by salon ID |
+
+**Examples:**
+```bash
+# Get all customers
+GET /customers/
+
+# Get customers for salon ID 1
+GET /customers/?salon=1
 ```
 
 **Response (200 OK):**
