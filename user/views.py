@@ -83,7 +83,7 @@ class CustomLoginView(LoginView):
                 httponly=True,
                 secure=True,
                 samesite="None",  # Required for cross-origin (different subdomains)
-                domain=".lichnails.co.uk",  # Share cookie across subdomains
+                # domain=".lichnails.co.uk",  # Share cookie across subdomains
                 max_age=3600,
             )
 
@@ -94,7 +94,7 @@ class CustomLoginView(LoginView):
                 httponly=True,
                 secure=True,
                 samesite="None",  # Required for cross-origin (different subdomains)
-                domain=".lichnails.co.uk",  # Share cookie across subdomains
+                # domain=".lichnails.co.uk",  # Share cookie across subdomains
                 max_age=604800,
             )
 
