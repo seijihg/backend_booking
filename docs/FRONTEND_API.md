@@ -343,22 +343,45 @@ DELETE /salons/{id}/
 
 ```http
 GET /customers/
-GET /customers/?salon={salon_id}
+GET /customers/?salon={salon_id}&sort_by={field}&order={asc|desc}
 ```
 
 **Query Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `salon` | int | No | Filter customers by salon ID |
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `salon` | int | No | - | Filter customers by salon ID |
+| `sort_by` | string | No | `created` | Field to sort by |
+| `order` | string | No | `desc` | Sort direction: `asc` or `desc` |
+
+**Sortable Fields:**
+- `id` - Customer ID
+- `full_name` - Alphabetical by name
+- `phone_number` - By phone number
+- `created` - By creation date (default)
+- `modified` - By last modification date
 
 **Examples:**
 ```bash
-# Get all customers
+# Get all customers (default: newest first)
 GET /customers/
 
 # Get customers for salon ID 1
 GET /customers/?salon=1
+
+# Sort by name A-Z
+GET /customers/?sort_by=full_name&order=asc
+
+# Sort by name Z-A
+GET /customers/?sort_by=full_name&order=desc
+
+# Oldest customers first
+GET /customers/?sort_by=created&order=asc
+
+# Combine filter and sort
+GET /customers/?salon=1&sort_by=full_name&order=asc
 ```
+
+**Note:** Invalid `sort_by` or `order` values silently fallback to defaults (`created` desc).
 
 **Response (200 OK):**
 ```json
