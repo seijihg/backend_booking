@@ -725,7 +725,228 @@ All errors follow this format:
 
 ## Frontend Implementation Notes
 
-### Fetch Configuration
+### Session Persistence
+
+The backend uses JWT tokens stored in HTTP-only cookies:
+
+| Token | Lifetime | Purpose |
+|-------|----------|---------|
+| `token` (access) | 1 hour | Authenticates API requests |
+| `refresh_token` | 7 days | Obtains new access tokens |
+
+**Important**: To keep users logged in for up to 7 days, the frontend **must** implement token refresh logic.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Session Timeline                              │
+├─────────────────────────────────────────────────────────────────┤
+│ Login                                                            │
+│   ├── access_token valid for 1 hour                             │
+│   └── refresh_token valid for 7 days                            │
+│                                                                  │
+│ After 1 hour (access token expires)                             │
+│   ├── API returns 401 Unauthorized                              │
+│   ├── Frontend calls POST /token/refresh/                       │
+│   ├── New access_token issued (1 hour)                          │
+│   └── Retry original request                                    │
+│                                                                  │
+│ After 7 days (refresh token expires)                            │
+│   └── User must log in again                                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### API Client with Auto-Refresh (Recommended)
+
+```javascript
+const API_BASE = 'http://localhost:8000';
+
+/**
+ * Makes an API request with automatic token refresh on 401.
+ * Keeps users logged in for up to 7 days without manual re-login.
+ */
+async function apiRequest(endpoint, options = {}) {
+  const fetchOptions = {
+    ...options,
+    credentials: 'include', // Required for cookies
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  };
+
+  let response = await fetch(`${API_BASE}${endpoint}`, fetchOptions);
+
+  // Handle expired access token
+  if (response.status === 401) {
+    const refreshed = await refreshAccessToken();
+
+    if (refreshed) {
+      // Retry original request with new token
+      response = await fetch(`${API_BASE}${endpoint}`, fetchOptions);
+    } else {
+      // Refresh token also expired - redirect to login
+      window.location.href = '/login';
+      throw new Error('Session expired. Please log in again.');
+    }
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(JSON.stringify(error));
+  }
+
+  if (response.status === 204) return null;
+  return response.json();
+}
+
+/**
+ * Refreshes the access token using the refresh token cookie.
+ * Returns true if successful, false if refresh token is also expired.
+ */
+async function refreshAccessToken() {
+  try {
+    const response = await fetch(`${API_BASE}/token/refresh/`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('Token refresh failed:', error);
+    return false;
+  }
+}
+```
+
+### React Hook Example
+
+```javascript
+import { useState, useCallback } from 'react';
+
+function useApi() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const request = useCallback(async (endpoint, options = {}) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await apiRequest(endpoint, options);
+      return data;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { request, loading, error };
+}
+
+// Usage
+function CustomerList() {
+  const { request, loading, error } = useApi();
+  const [customers, setCustomers] = useState([]);
+
+  useEffect(() => {
+    request('/customers/?sort_by=full_name&order=asc')
+      .then(setCustomers)
+      .catch(console.error);
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  return (
+    <ul>
+      {customers.map(c => <li key={c.id}>{c.full_name}</li>)}
+    </ul>
+  );
+}
+```
+
+### Proactive Token Refresh (Optional)
+
+Refresh tokens before they expire to avoid any 401 errors:
+
+```javascript
+// Start after successful login
+function startTokenRefreshTimer() {
+  // Refresh every 55 minutes (before 1-hour expiry)
+  const REFRESH_INTERVAL = 55 * 60 * 1000;
+
+  setInterval(async () => {
+    const success = await refreshAccessToken();
+    if (!success) {
+      // Session expired, redirect to login
+      window.location.href = '/login';
+    }
+  }, REFRESH_INTERVAL);
+}
+
+// Call after login
+async function handleLogin(email, password) {
+  const response = await apiRequest('/users/login/', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+
+  // Start background refresh timer
+  startTokenRefreshTimer();
+
+  return response.user;
+}
+```
+
+### Authentication Flow Summary
+
+```
+┌──────────────┐    POST /users/login/     ┌──────────────┐
+│   Frontend   │ ─────────────────────────►│   Backend    │
+│              │◄───────────────────────── │              │
+│              │  Set-Cookie: token,       │              │
+│              │  refresh_token            │              │
+└──────────────┘                           └──────────────┘
+       │                                          │
+       │  All subsequent requests:                │
+       │  credentials: 'include'                  │
+       │  (cookies sent automatically)            │
+       │                                          │
+       ▼                                          ▼
+┌──────────────┐                           ┌──────────────┐
+│  401 Error?  │───► POST /token/refresh/ ►│ New token    │
+│  (expired)   │◄──────────────────────────│ in cookie    │
+└──────────────┘                           └──────────────┘
+       │
+       ▼
+  Retry original request
+```
+
+### Logout
+
+To log out, clear the cookies:
+
+```javascript
+async function logout() {
+  // Clear cookies by setting expired date
+  document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
+  // Redirect to login
+  window.location.href = '/login';
+}
+```
+
+**Note**: Since cookies are HTTP-only, you cannot read them from JavaScript. The browser handles them automatically with `credentials: 'include'`.
+
+### Basic Fetch (Without Auto-Refresh)
+
+If you don't need 7-day persistence (users re-login after 1 hour):
 
 ```javascript
 const API_BASE = 'http://localhost:8000';
@@ -741,6 +962,10 @@ async function apiRequest(endpoint, options = {}) {
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      window.location.href = '/login';
+      return;
+    }
     const error = await response.json();
     throw new Error(JSON.stringify(error));
   }
