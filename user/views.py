@@ -1,7 +1,9 @@
 from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LoginView
+from django.conf import settings
 from rest_framework import status
 from rest_framework.generics import ListAPIView
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -9,6 +11,11 @@ from user.serializers import UserCreateSerializer, UserSerializer
 
 from .helpers import generate_tokens
 from .models import ExtendedUser
+
+# Cookie configuration - matches login/register cookie settings
+COOKIE_DOMAIN = ".lichnails.co.uk" if not settings.DEVELOPMENT_MODE else None
+COOKIE_SAMESITE = "None"
+COOKIE_PATH = "/"
 
 
 # Create your views here.
@@ -56,6 +63,56 @@ class CustomRegisterView(RegisterView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class CustomLogoutView(APIView):
+    """
+    Custom logout view that clears HTTP-only authentication cookies.
+
+    This view handles logout for JWT authentication where tokens are stored
+    in HTTP-only cookies rather than localStorage/sessionStorage.
+    """
+
+    permission_classes = [AllowAny]  # noqa: RUF012
+
+    def post(self, request, *args, **kwargs):
+        """
+        Handle POST request to logout user.
+
+        Clears both access token and refresh token cookies by setting
+        them to empty values with max_age=0.
+        """
+        response = Response(
+            {"detail": "Successfully logged out."},
+            status=status.HTTP_200_OK,
+        )
+
+        self._clear_auth_cookies(response)
+
+        return response
+
+    def _clear_auth_cookies(self, response):
+        """
+        Clear authentication cookies from the response.
+
+        Sets cookies to empty values with max_age=0 to instruct
+        the browser to delete them immediately.
+        """
+        # Clear access token cookie
+        response.delete_cookie(
+            key="token",
+            path=COOKIE_PATH,
+            domain=COOKIE_DOMAIN,
+            samesite=COOKIE_SAMESITE,
+        )
+
+        # Clear refresh token cookie
+        response.delete_cookie(
+            key="refresh_token",
+            path=COOKIE_PATH,
+            domain=COOKIE_DOMAIN,
+            samesite=COOKIE_SAMESITE,
+        )
+
+
 class CustomLoginView(LoginView):
     def get_response(self):
         response = super().get_response()
@@ -82,8 +139,8 @@ class CustomLoginView(LoginView):
                 tokens["access_token"],
                 httponly=True,
                 secure=True,
-                samesite="None",  # Required for cross-origin (different subdomains)
-                domain=".lichnails.co.uk",  # Share cookie across subdomains
+                samesite=COOKIE_SAMESITE,  # Required for cross-origin (different subdomains)
+                domain=COOKIE_DOMAIN,  # Share cookie across subdomains
                 max_age=3600,
             )
 
@@ -93,8 +150,8 @@ class CustomLoginView(LoginView):
                 tokens["refresh_token"],
                 httponly=True,
                 secure=True,
-                samesite="None",  # Required for cross-origin (different subdomains)
-                domain=".lichnails.co.uk",  # Share cookie across subdomains
+                samesite=COOKIE_SAMESITE,  # Required for cross-origin (different subdomains)
+                domain=COOKIE_DOMAIN,  # Share cookie across subdomains
                 max_age=604800,
             )
 
