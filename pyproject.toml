@@ -35,6 +35,7 @@ fix = true
   "B008",
 ] # allow asserts & non-abstract dataclasses in tests
 "scripts/**/*" = ["E402"] # allow imports after side-effects in CLI helpers
+"booking_api/test_settings.py" = ["E402"] # env vars must be set before settings import
 "*/migrations/*" = ["RUF012"] # ignore mutable class attributes in Django migrations
 
 [tool.pytest.ini_options]
