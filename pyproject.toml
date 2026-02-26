@@ -37,6 +37,10 @@ fix = true
 "scripts/**/*" = ["E402"] # allow imports after side-effects in CLI helpers
 "*/migrations/*" = ["RUF012"] # ignore mutable class attributes in Django migrations
 
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "booking_api.test_settings"
+pythonpath = ["."]
+
 [tool.isort]
 profile = "black"
 line_length = 88
