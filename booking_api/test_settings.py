@@ -1,4 +1,12 @@
+import os
+
 from booking_api.settings import *  # noqa: F403
+
+# Required env vars that settings.py reads at import time.
+# setdefault ensures real values are not overridden if present.
+os.environ.setdefault("DJANGO_SECRET_KEY", "test-secret-key-not-for-production")
+os.environ.setdefault("DATABASE_URL", "sqlite:///dev-null")
+
 
 # Use SQLite for tests (no PostgreSQL dependency)
 DATABASES = {
