@@ -1,4 +1,4 @@
-.PHONY: migrate server dramatiq
+.PHONY: migrate server dramatiq test
 
 migrations:
 	python3 manage.py makemigrations
@@ -20,3 +20,12 @@ else
 	. .venv/bin/activate; \
 	python3 manage.py rundramatiq;
 endif
+
+test:
+	pytest -v
+
+test-voice:
+	pytest booking_api/voice/tests/ -v
+
+test-cov:
+	pytest --cov=booking_api.voice --cov-report=term-missing
