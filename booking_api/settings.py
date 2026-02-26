@@ -234,4 +234,9 @@ TWILIO_ACCOUNT_SID = os.environ.get("TWILLIO_SID")
 TWILIO_AUTH_TOKEN = os.environ.get("TWILLIO_TOKEN")
 TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
 
+# OpenAI (Voice Booking)
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o")
+OPENAI_WHISPER_MODEL = os.environ.get("OPENAI_WHISPER_MODEL", "whisper-1")
+
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")

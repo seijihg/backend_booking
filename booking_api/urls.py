@@ -41,4 +41,5 @@ urlpatterns = [
     path("salons/", include("salon.urls")),
     path("appointments/", include("appointment.urls")),
     path("customers/", include("customer.urls")),
+    path("voice/", include("booking_api.voice.urls")),
 ]
