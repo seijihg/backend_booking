@@ -1,6 +1,10 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from booking_api.voice.serializers import TranscribeRequestSerializer
+from booking_api.voice.serializers import (
+    ChatRequestSerializer,
+    MessageSerializer,
+    TranscribeRequestSerializer,
+)
 
 # ---------------------------------------------------------------------------
 # TranscribeRequestSerializer
@@ -79,3 +83,100 @@ class TestTranscribeRequestLanguage:
         )
         assert serializer.is_valid(), serializer.errors
         assert serializer.validated_data["language"] == "vi"
+
+
+# ---------------------------------------------------------------------------
+# MessageSerializer
+# ---------------------------------------------------------------------------
+
+
+class TestMessageSerializer:
+    def test_valid_user_message(self):
+        serializer = MessageSerializer(data={"role": "user", "content": "hello"})
+        assert serializer.is_valid(), serializer.errors
+
+    def test_valid_assistant_message(self):
+        serializer = MessageSerializer(
+            data={"role": "assistant", "content": "How can I help?"}
+        )
+        assert serializer.is_valid(), serializer.errors
+
+    def test_valid_tool_message(self):
+        serializer = MessageSerializer(
+            data={
+                "role": "tool",
+                "content": '{"found": true}',
+                "tool_call_id": "call_abc123",
+            }
+        )
+        assert serializer.is_valid(), serializer.errors
+
+    def test_valid_assistant_with_tool_calls(self):
+        serializer = MessageSerializer(
+            data={
+                "role": "assistant",
+                "content": "",
+                "tool_calls": [
+                    {
+                        "id": "call_123",
+                        "type": "function",
+                        "function": {
+                            "name": "lookup_customer",
+                            "arguments": '{"phone_number": "+447700900123"}',
+                        },
+                    }
+                ],
+            }
+        )
+        assert serializer.is_valid(), serializer.errors
+
+    def test_rejects_invalid_role(self):
+        serializer = MessageSerializer(data={"role": "admin", "content": "hello"})
+        assert not serializer.is_valid()
+        assert "role" in serializer.errors
+
+
+# ---------------------------------------------------------------------------
+# ChatRequestSerializer
+# ---------------------------------------------------------------------------
+
+
+class TestChatRequestSerializer:
+    def test_valid_first_message(self):
+        serializer = ChatRequestSerializer(
+            data={"message": "Book appointment", "conversation_history": []}
+        )
+        assert serializer.is_valid(), serializer.errors
+
+    def test_valid_with_history(self):
+        serializer = ChatRequestSerializer(
+            data={
+                "message": "Yes, column 3",
+                "conversation_history": [
+                    {"role": "user", "content": "Book at 2pm"},
+                    {"role": "assistant", "content": "Which column?"},
+                ],
+            }
+        )
+        assert serializer.is_valid(), serializer.errors
+
+    def test_rejects_missing_message(self):
+        serializer = ChatRequestSerializer(data={"conversation_history": []})
+        assert not serializer.is_valid()
+        assert "message" in serializer.errors
+
+    def test_defaults_empty_history(self):
+        serializer = ChatRequestSerializer(data={"message": "hello"})
+        assert serializer.is_valid(), serializer.errors
+        assert serializer.validated_data["conversation_history"] == []
+
+    def test_rejects_invalid_role_in_history(self):
+        serializer = ChatRequestSerializer(
+            data={
+                "message": "hello",
+                "conversation_history": [
+                    {"role": "admin", "content": "bad role"},
+                ],
+            }
+        )
+        assert not serializer.is_valid()

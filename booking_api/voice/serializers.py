@@ -34,3 +34,23 @@ class TranscribeRequestSerializer(serializers.Serializer):
 
 class TranscribeResponseSerializer(serializers.Serializer):
     text = serializers.CharField()
+
+
+VALID_ROLES = {"user", "assistant", "tool", "system"}
+
+
+class MessageSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=list(VALID_ROLES))
+    content = serializers.CharField(allow_blank=True, required=False, default="")
+    tool_call_id = serializers.CharField(required=False)
+    tool_calls = serializers.ListField(child=serializers.DictField(), required=False)
+
+
+class ChatRequestSerializer(serializers.Serializer):
+    message = serializers.CharField(required=True)
+    conversation_history = MessageSerializer(many=True, required=False, default=[])
+
+
+class ChatResponseSerializer(serializers.Serializer):
+    reply = serializers.CharField()
+    conversation_history = serializers.ListField(child=serializers.DictField())
