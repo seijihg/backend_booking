@@ -39,3 +39,8 @@ DRAMATIQ_BROKER = {
 TWILIO_ACCOUNT_SID = "AC_test_sid"
 TWILIO_AUTH_TOKEN = "test_auth_token"
 TWILIO_PHONE_NUMBER = "+15005550006"
+
+# Dummy OpenAI credentials (never actually called, mocked in tests)
+OPENAI_API_KEY = "sk-test-key"
+OPENAI_MODEL = "gpt-4o"
+OPENAI_WHISPER_MODEL = "whisper-1"
