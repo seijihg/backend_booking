@@ -41,12 +41,15 @@ def test_transcribe_audio_calls_whisper(mock_get_client, settings):
     mock_get_client.return_value = mock_client
 
     fake_file = MagicMock()
+    fake_file.name = "audio.wav"
+    fake_file.read.return_value = b"fake-audio-bytes"
+    fake_file.content_type = "audio/wav"
     result = transcribe_audio(fake_file, language="en")
 
     assert result == "Book Ellie at 3pm"
     mock_client.audio.transcriptions.create.assert_called_once_with(
         model="whisper-1",
-        file=fake_file,
+        file=("audio.wav", b"fake-audio-bytes", "audio/wav"),
         language="en",
     )
 

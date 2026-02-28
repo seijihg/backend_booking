@@ -23,7 +23,7 @@ def transcribe_audio(audio_file, language="en"):
     client = get_openai_client()
     transcription = client.audio.transcriptions.create(
         model=settings.OPENAI_WHISPER_MODEL,
-        file=audio_file,
+        file=(audio_file.name, audio_file.read(), audio_file.content_type),
         language=language,
     )
     return transcription.text
