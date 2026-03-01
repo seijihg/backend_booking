@@ -10,6 +10,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from appointment.models import Appointment
+from appointment.serializers import AppointmentSerializer
+
 from .openai_client import chat_completion, transcribe_audio
 from .prompts import SYSTEM_PROMPT
 from .serializers import ChatRequestSerializer, TranscribeRequestSerializer
@@ -83,7 +86,9 @@ class ChatView(APIView):
         history = list(messages[1:])
 
         try:
-            reply_text = self._tool_call_loop(messages, salon, request.user)
+            reply_text, created_appointment_ids = self._tool_call_loop(
+                messages, salon, request.user
+            )
         except OpenAIError as exc:
             logger.exception("Chat failed")
             return Response(
@@ -94,18 +99,30 @@ class ChatView(APIView):
         # Add final assistant reply to history
         history.append({"role": "assistant", "content": reply_text})
 
-        return Response(
-            {"reply": reply_text, "conversation_history": history},
-            status=status.HTTP_200_OK,
-        )
+        response_data = {
+            "reply": reply_text,
+            "conversation_history": history,
+        }
+
+        if created_appointment_ids:
+            appointments = Appointment.objects.filter(
+                id__in=created_appointment_ids
+            ).select_related("customer", "salon", "user")
+            response_data["appointments"] = AppointmentSerializer(
+                appointments, many=True
+            ).data
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
     def _tool_call_loop(self, messages, salon, user):
+        created_appointment_ids = []
+
         for _round in range(MAX_TOOL_CALL_ROUNDS):
             response = chat_completion(messages, TOOL_DEFINITIONS)
             choice = response.choices[0].message
 
             if not choice.tool_calls:
-                return choice.content or ""
+                return choice.content or "", created_appointment_ids
 
             # Append assistant message with tool calls
             assistant_msg = {
@@ -137,7 +154,13 @@ class ChatView(APIView):
                     }
                 )
 
+                # Track created appointments
+                if tc.function.name == "create_appointment":
+                    result_data = json.loads(result)
+                    if result_data.get("created"):
+                        created_appointment_ids.append(result_data["appointment_id"])
+
         return (
             "I'm having trouble processing your request. "
             "Please try again with a simpler instruction."
-        )
+        ), created_appointment_ids
