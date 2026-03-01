@@ -98,6 +98,13 @@ TOOL_DEFINITIONS = [
                         "type": "integer",
                         "description": "Customer's database ID.",
                     },
+                    "phone_number": {
+                        "type": "string",
+                        "description": (
+                            "Customer phone number in E.164 format. "
+                            "Must match the customer record as a safety check."
+                        ),
+                    },
                     "appointment_time": {
                         "type": "string",
                         "description": (
@@ -123,7 +130,12 @@ TOOL_DEFINITIONS = [
                         "default": "",
                     },
                 },
-                "required": ["customer_id", "appointment_time", "column_id"],
+                "required": [
+                    "customer_id",
+                    "phone_number",
+                    "appointment_time",
+                    "column_id",
+                ],
                 "additionalProperties": False,
             },
         },

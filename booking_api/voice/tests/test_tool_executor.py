@@ -333,6 +333,7 @@ class TestCreateAppointment:
                 "create_appointment",
                 {
                     "customer_id": customer.id,
+                    "phone_number": "+447700900123",
                     "appointment_time": future_time,
                     "duration_minutes": 30,
                     "column_id": 3,
@@ -357,6 +358,7 @@ class TestCreateAppointment:
                 "create_appointment",
                 {
                     "customer_id": customer.id,
+                    "phone_number": "+447700900123",
                     "appointment_time": future_time,
                     "duration_minutes": 45,
                     "column_id": 1,
@@ -376,6 +378,7 @@ class TestCreateAppointment:
                 "create_appointment",
                 {
                     "customer_id": customer.id,
+                    "phone_number": "+447700900123",
                     "appointment_time": future_time,
                     "column_id": 1,
                 },
@@ -394,6 +397,7 @@ class TestCreateAppointment:
                 "create_appointment",
                 {
                     "customer_id": customer.id,
+                    "phone_number": "+447700900123",
                     "appointment_time": past_time,
                     "column_id": 1,
                 },
@@ -411,6 +415,7 @@ class TestCreateAppointment:
                 "create_appointment",
                 {
                     "customer_id": customer.id,
+                    "phone_number": "+447700900123",
                     "appointment_time": future_time,
                     "column_id": 6,
                 },
@@ -451,6 +456,7 @@ class TestCreateAppointment:
                 "create_appointment",
                 {
                     "customer_id": customer.id,
+                    "phone_number": "+447700900123",
                     "appointment_time": future_time,
                     "duration_minutes": 25,
                     "column_id": 1,
@@ -469,6 +475,7 @@ class TestCreateAppointment:
                 "create_appointment",
                 {
                     "customer_id": customer.id,
+                    "phone_number": "+447700900123",
                     "appointment_time": future_time,
                     "column_id": 2,
                     "comment": "Gel nails",
@@ -488,6 +495,7 @@ class TestCreateAppointment:
                 "create_appointment",
                 {
                     "customer_id": customer.id,
+                    "phone_number": "+447700900123",
                     "appointment_time": future_time,
                     "column_id": 4,
                 },
@@ -496,6 +504,26 @@ class TestCreateAppointment:
             )
         )
         assert Appointment.objects.filter(id=result["appointment_id"]).exists()
+
+    @pytest.mark.django_db
+    def test_rejects_phone_number_mismatch(self, salon, user, customer):
+        future_time = (timezone.now() + timedelta(days=1)).isoformat()
+        result = json.loads(
+            execute_tool_call(
+                "create_appointment",
+                {
+                    "customer_id": customer.id,
+                    "phone_number": "+447999999999",
+                    "appointment_time": future_time,
+                    "column_id": 1,
+                },
+                salon,
+                user,
+            )
+        )
+        assert "error" in result
+        assert "mismatch" in result["error"].lower()
+        assert not Appointment.objects.filter(customer=customer).exists()
 
 
 # ---------------------------------------------------------------------------

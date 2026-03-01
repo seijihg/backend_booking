@@ -144,6 +144,7 @@ def _find_conflicts(salon, column_id, start_dt, end_dt):
 
 def _handle_create_appointment(args, salon, user):
     customer_id = args.get("customer_id")
+    phone_number = args.get("phone_number", "")
     appointment_time_str = args.get("appointment_time", "")
     duration = args.get("duration_minutes", 60)
     column_id = args.get("column_id")
@@ -176,6 +177,18 @@ def _handle_create_appointment(args, salon, user):
         customer = Customer.objects.get(id=customer_id, salons=salon)
     except Customer.DoesNotExist:
         return json.dumps({"error": f"Customer {customer_id} not found in this salon."})
+
+    # Cross-check phone number matches customer record
+    if phone_number and str(customer.phone_number) != phone_number:
+        return json.dumps(
+            {
+                "error": (
+                    f"Phone number mismatch: customer {customer_id} has "
+                    f"{customer.phone_number}, not {phone_number}. "
+                    f"Use the correct customer_id."
+                ),
+            }
+        )
 
     end_dt = start_dt + timedelta(minutes=duration)
 
